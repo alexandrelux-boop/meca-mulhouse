@@ -418,7 +418,6 @@
       </div>
 
       <div class="p-6 overflow-y-auto space-y-5 flex-1">
-        <!-- GAIN APPORTÉ -->
         <div id="rex-detail-gain-container" class="p-3 bg-sky-50/70 border border-sky-200 rounded-xl flex items-center space-x-2.5">
           <div class="p-2 bg-sky-600 text-white rounded-lg shrink-0">
             <i data-lucide="trending-up" class="w-4 h-4"></i>
@@ -429,7 +428,6 @@
           </div>
         </div>
 
-        <!-- DESCRIPTION -->
         <div class="space-y-1.5">
           <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
             <i data-lucide="align-left" class="w-3.5 h-3.5 text-sky-600"></i>
@@ -438,7 +436,6 @@
           <p id="rex-detail-desc" class="text-xs text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-sky-100 whitespace-pre-line"></p>
         </div>
 
-        <!-- PIÈCES JOINTES & DOCUMENTS -->
         <div class="space-y-2">
           <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
             <i data-lucide="paperclip" class="w-3.5 h-3.5 text-sky-600"></i>
@@ -464,7 +461,7 @@
     </div>
   </div>
 
-  <!-- AUTRES MODALES -->
+  <!-- MODALE CREATION / MODIFICATION REX -->
   <div id="modal-add-rex" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white border border-sky-200 rounded-xl w-full max-w-lg overflow-hidden shadow-2xl p-6 space-y-4">
       <div class="flex justify-between items-center border-b border-sky-100 pb-3">
@@ -520,6 +517,7 @@
     </div>
   </div>
 
+  <!-- MODALE CREATION / MODIFICATION MACHINE -->
   <div id="modal-add-node" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white border border-sky-200 rounded-xl w-full max-w-md overflow-hidden shadow-2xl">
       <div class="p-4 border-b border-sky-100 flex justify-between items-center bg-sky-50/50">
@@ -588,6 +586,7 @@
     </div>
   </div>
 
+  <!-- MODALE CONNEXION UTILISATEUR -->
   <div id="modal-login" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white border border-sky-200 rounded-xl w-full max-w-sm overflow-hidden shadow-2xl p-6 space-y-4">
       <div class="text-center space-y-1">
@@ -617,6 +616,7 @@
     </div>
   </div>
 
+  <!-- MODALE CREATION UTILISATEUR -->
   <div id="modal-create-user" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white border border-sky-200 rounded-xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4">
       <div class="flex justify-between items-center border-b border-sky-100 pb-3">
@@ -661,9 +661,8 @@
     </div>
   </div>
 
-  <!-- LOGIQUE JAVASCRIPT AMÉLIORÉE ET OPTIMISÉE -->
   <script>
-    // NOTIFICATIONS TOAST & MODALES PERSONNALISÉES (SANS ALERT NI CONFIRM)
+    /* NOTIFICATIONS TOAST ET BOITES DE DIALOGUE PERSONNALISÉES */
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -746,9 +745,9 @@
       promptCallback = null;
     }
 
-    // 1. CONFIGURATION SUPABASE
     const SUPABASE_URL = "https://xhodigctsnwtwwwjmyzt.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_U0YbjQvslDpf1RLGN2rXJA_gOLYvC7j";
+    const STORAGE_BUCKET_NAME = "fichiers-meca";
     
     let supabaseClient = null;
     let supabaseRecordId = null;
@@ -762,7 +761,38 @@
       console.error("Erreur d'initialisation de Supabase:", err);
     }
 
-    // UTILITY: Hashage SHA-256 Sécurisé côté client
+    // UPLOAD DIRECT VERS SUPABASE STORAGE (BUCKET)
+    async function uploadFileToSupabaseStorage(file, folder = 'machines') {
+      if (!supabaseClient) return null;
+      try {
+        const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const filePath = `${folder}/${Date.now()}_${cleanName}`;
+
+        const { data, error } = await supabaseClient
+          .storage
+          .from(STORAGE_BUCKET_NAME)
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true
+          });
+
+        if (error) {
+          console.warn("Storage upload warning:", error);
+          return null;
+        }
+
+        const { data: publicData } = supabaseClient
+          .storage
+          .from(STORAGE_BUCKET_NAME)
+          .getPublicUrl(filePath);
+
+        return publicData ? publicData.publicUrl : null;
+      } catch (e) {
+        console.warn("Échec upload Supabase Storage, bascule en local:", e);
+        return null;
+      }
+    }
+
     async function hashPassword(str) {
       const encoder = new TextEncoder();
       const data = encoder.encode(str);
@@ -771,7 +801,6 @@
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // 2. ÉTAT DU SYSTÈME D'ORIGINE
     let currentParentId = null;
     let editingNodeId = null;
     let editingRexId = null;
@@ -782,7 +811,6 @@
     let currentTreeSearchQuery = "";
     let currentViewerBlobUrl = null;
 
-    // Profil Invité par défaut (Consultation seule)
     const GUEST_USER = { 
       id: 'guest', 
       firstname: 'Invité', 
@@ -795,7 +823,6 @@
       { id: 'u2', firstname: 'Technicien', lastname: 'Equipe A', role: 'Technicien', passwordHash: '281699f8d95e0c5cf5219921e42c27b0b2e35eb52c7be0cc80e22a48a9062334' }
     ];
 
-    // Chargement de la session spécifique à CE poste/onglet
     function getInitialLocalUser() {
       try {
         const savedSession = sessionStorage.getItem('meca_local_user');
@@ -825,7 +852,6 @@
       rexList: []
     };
 
-    // LOGGING SYSTEM (AUDIT)
     function addAuditLog(action, details = "") {
       const userStr = state.activeUser ? `${state.activeUser.firstname} ${state.activeUser.lastname} (${state.activeUser.role})` : 'Système';
       const logEntry = {
@@ -859,7 +885,6 @@
       `).join('');
     }
 
-    // 3. CHARGEMENT ET INITIALISATION
     document.addEventListener("DOMContentLoaded", async () => {
       applyUserPermissions();
       renderTree();
@@ -949,7 +974,6 @@
             if (cloudData.rexList) state.rexList = cloudData.rexList;
             if (cloudData.synoptiqueUrl !== undefined) state.synoptiqueUrl = cloudData.synoptiqueUrl;
             if (cloudData.users) state.users = cloudData.users;
-            // NOTE : on n'écrase SURTOUT PAS cloudData.activeUser afin que chaque poste conserve sa propre session locale
             if (cloudData.auditLogs) state.auditLogs = cloudData.auditLogs;
           }
         }
@@ -980,7 +1004,6 @@
     }
 
     async function saveState() {
-      // Données partagées d'entreprise (sans la session individuelle du poste)
       const backupData = {
         exportDate: new Date().toISOString(),
         users: state.users,
@@ -1075,7 +1098,6 @@
       document.getElementById('current-user-fullname').innerText = userFullname;
       document.getElementById('current-user-badge').innerText = role;
 
-      // Gestion des boutons de connexion / déconnexion de la topbar
       const btnLogin = document.getElementById('btn-login-trigger');
       const btnLogout = document.getElementById('btn-logout-trigger');
       if (btnLogin && btnLogout) {
@@ -1292,7 +1314,6 @@
           filesHeaderDOM.innerHTML = `<span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Ressources & Fichiers de la machine (${node.files.length})</span>`;
           contentDOM.appendChild(filesHeaderDOM);
 
-          // SÉPARATION DES DOSSIERS RACINES ET DES FICHIERS DIRECTS
           const folderGroups = {};
           const directFiles = [];
 
@@ -1306,7 +1327,6 @@
             }
           });
 
-          // 1. AFFICHAGE DES DOSSIERS RACINES AVEC LEURS FICHIERS CONTENUS
           Object.keys(folderGroups).forEach(fldrName => {
             const groupFiles = folderGroups[fldrName];
             const pdfCount = groupFiles.filter(f => f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf'))).length;
@@ -1340,7 +1360,6 @@
             contentDOM.appendChild(folderContainer);
           });
 
-          // 2. AFFICHAGE DES FICHIERS DIRECTS ET LIENS INDÉPENDANTS
           if (directFiles.length > 0) {
             if (Object.keys(folderGroups).length > 0) {
               const directHeader = document.createElement('div');
@@ -1386,16 +1405,16 @@
     function handleFileClick(file) {
       if (!file || !file.dataUrl) return;
 
-      if (file.dataUrl.startsWith('http://') || file.dataUrl.startsWith('https://')) {
-        window.open(file.dataUrl, '_blank');
-        return;
-      }
-
       const isImg = file.type && file.type.startsWith('image/');
       const isPdf = file.type === 'application/pdf' || (file.name && file.name.toLowerCase().endsWith('.pdf')) || file.dataUrl.includes('application/pdf');
 
       if (isImg || isPdf) {
         openViewerModal(file);
+        return;
+      }
+
+      if (file.dataUrl.startsWith('http://') || file.dataUrl.startsWith('https://')) {
+        window.open(file.dataUrl, '_blank');
         return;
       }
 
@@ -1423,7 +1442,6 @@
       }
     }
 
-    // CRÉATION D'UNE CARTE DE FICHIER INTERACTIVE (PDF, IMAGES, LIENS)
     function createFileCardDOM(f) {
       const isDrive = f.type === 'googledrive' || (f.dataUrl && f.dataUrl.includes('drive.google'));
       const isSheet = f.type === 'googlesheet' || (f.type && f.type.includes('sheet'));
@@ -1480,7 +1498,6 @@
       return card;
     }
 
-    // UTILITAIRE DE NORMALISATION DES FICHIERS REX
     function normalizeRexFile(fileItem, defaultName = 'Document') {
       if (!fileItem) return null;
       if (typeof fileItem === 'object' && fileItem.dataUrl) {
@@ -1526,7 +1543,6 @@
 
       let displayUrl = normalized.dataUrl;
 
-      // CONVERSION EN BLOB URL POUR UNE LECTURE FLUIDE DES PDFS EN NAVIGATEUR
       if (normalized.dataUrl.startsWith('data:')) {
         try {
           const parts = normalized.dataUrl.split(',');
@@ -1606,7 +1622,6 @@
       }
     }
 
-    // MODALE DE CONSULTATION DÉTAILLÉE D'UN REX
     function openRexDetailModal(rexId) {
       const rex = state.rexList.find(r => r.id === rexId);
       if (!rex) return;
@@ -1672,7 +1687,6 @@
         });
       }
 
-      // ACTIONS DE LA MODALE
       document.getElementById('rex-detail-btn-print').onclick = () => printSingleRex(rex.id);
       
       const editBtn = document.getElementById('rex-detail-btn-edit');
@@ -1932,83 +1946,62 @@
       showToast("Lien Google Drive ajouté.", 'success');
     }
 
-    function processFilesBatch(files, folderName = null) {
+    async function processFilesBatch(files, folderName = null) {
       if (!files || files.length === 0) return;
 
-      // Filtrer les fichiers indésirables système
       const validFiles = files.filter(f => !f.name.startsWith('.') && f.name !== 'Thumbs.db');
       if (validFiles.length === 0) {
         showToast("Aucun fichier valide trouvé dans ce dossier.", 'warning');
         return;
       }
 
-      // Si un dossier racine a été sélectionné, attribuer automatiquement son nom à la sous-machine
       const nameInput = document.getElementById('input-name');
-      if (folderName && nameInput) {
+      if (folderName && nameInput && !nameInput.value.trim()) {
         nameInput.value = folderName;
       }
 
-      let pending = validFiles.length;
-      let addedCount = 0;
+      showToast(`Téléversement de ${validFiles.length} fichier(s)...`, 'info');
 
-      validFiles.forEach(f => {
-        if (f.size > 8 * 1024 * 1024) {
-          showToast(`"${f.name}" dépasse 8Mo.`, 'warning');
+      for (const f of validFiles) {
+        const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+        let fileType = isPdf ? 'application/pdf' : (f.type || 'application/octet-stream');
+        
+        let publicUrl = await uploadFileToSupabaseStorage(f, 'machines');
+        let finalDataUrl = publicUrl;
+
+        if (!finalDataUrl) {
+          finalDataUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (evt) => resolve(evt.target.result);
+            reader.readAsDataURL(f);
+          });
         }
 
-        const isGoogleDriveShortcut = f.name.endsWith('.gdoc') || f.name.endsWith('.gsheet') || f.name.endsWith('.gslides') || f.name.endsWith('.url');
-
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
-          let fileType = isPdf ? 'application/pdf' : (f.type || 'application/octet-stream');
-          let fileDataUrl = evt.target.result;
-
-          if (isGoogleDriveShortcut) {
-            try {
-              const textContent = evt.target.result;
-              const match = textContent.match(/https?:\/\/[^\s"']+/);
-              if (match) {
-                fileDataUrl = match[0];
-                fileType = f.name.endsWith('.gsheet') ? 'googlesheet' : (f.name.endsWith('.gdoc') ? 'googledoc' : 'googledrive');
-              }
-            } catch(err) {}
+        let displayName = f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, '');
+        const relPath = f.webkitRelativePath || '';
+        if (relPath) {
+          const parts = relPath.split('/');
+          if (parts.length > 2) {
+            displayName = parts.slice(1, -1).join('/') + '/' + displayName;
           }
+        }
 
-          // Conservation du sous-chemin si importé depuis un sous-dossier
-          let displayName = f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, '');
-          const relPath = f.webkitRelativePath || '';
-          if (relPath) {
-            const parts = relPath.split('/');
-            if (parts.length > 2) {
-              displayName = parts.slice(1, -1).join('/') + '/' + displayName;
-            }
-          }
+        newUploadFilesList.push({
+          name: displayName,
+          folder: folderName || null,
+          relativePath: relPath,
+          size: (f.size / 1024).toFixed(1) + ' Ko',
+          type: fileType,
+          dataUrl: finalDataUrl
+        });
+      }
 
-          newUploadFilesList.push({
-            name: displayName,
-            folder: folderName || null,
-            relativePath: relPath,
-            size: (f.size / 1024).toFixed(1) + ' Ko',
-            type: fileType,
-            dataUrl: fileDataUrl
-          });
-
-          addedCount++;
-          pending--;
-          if (pending === 0) {
-            updateUploadedFilesListUI();
-            if (folderName) {
-              showToast(`Dossier racine "${folderName}" importé (${addedCount} fichier(s)) !`, 'success');
-            } else {
-              showToast(`${addedCount} fichier(s) ajouté(s).`, 'success');
-            }
-          }
-        };
-
-        if (isGoogleDriveShortcut) reader.readAsText(f);
-        else reader.readAsDataURL(f);
-      });
+      updateUploadedFilesListUI();
+      if (folderName) {
+        showToast(`Dossier racine "${folderName}" synchronisé (${validFiles.length} fichier(s)) !`, 'success');
+      } else {
+        showToast(`${validFiles.length} fichier(s) synchronisé(s).`, 'success');
+      }
     }
 
     function handleMachineFilesUpload(e) {
@@ -2021,7 +2014,6 @@
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
 
-      // Récupérer le nom du dossier racine importé
       let folderName = 'Dossier Drive';
       if (files[0].webkitRelativePath) {
         folderName = files[0].webkitRelativePath.split('/')[0];
@@ -2063,7 +2055,6 @@
 
       wrapper.classList.remove('hidden');
 
-      // Regrouper par dossier racine pour une lecture claire
       const groups = {};
       const loose = [];
       existingFilesList.forEach((f, idx) => {
@@ -2110,7 +2101,6 @@
         return;
       }
 
-      // Regrouper par dossier racine
       const groups = {};
       const loose = [];
       newUploadFilesList.forEach((f, idx) => {
@@ -2217,7 +2207,7 @@
           <div class="flex flex-wrap gap-2 pt-2 border-t border-sky-100">
             ${attachments.map((f, i) => {
               const isPdf = f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf'));
-              if (!isPdf && f.dataUrl.startsWith('data:image')) {
+              if (!isPdf && (f.dataUrl.startsWith('data:image') || f.dataUrl.includes('image'))) {
                 return `
                   <div onclick="event.stopPropagation(); openViewerModal(rexAttachedFilesMap['${rex.id}_${i}'])" class="relative group h-14 w-20 rounded-lg overflow-hidden border border-sky-200 cursor-pointer hover:border-sky-400 transition shadow-sm">
                     <img src="${f.dataUrl}" class="h-full w-full object-cover group-hover:scale-105 transition">
@@ -2240,7 +2230,6 @@
         `;
       }
 
-      // STOCKAGE D'INDEXATION TEMPORAIRE POUR LE CLIC DES DOCUMENTS
       if (!window.rexAttachedFilesMap) window.rexAttachedFilesMap = {};
       attachments.forEach((f, i) => {
         window.rexAttachedFilesMap[`${rex.id}_${i}`] = f;
@@ -2304,7 +2293,6 @@
 
       updateRexSubmachineOptions();
 
-      // Réinitialisation du formulaire
       document.getElementById('form-rex').reset();
       rexAttachedImages = [];
       renderRexFilesPreview();
@@ -2352,27 +2340,33 @@
       }
     }
 
-    function handleRexFilesSelect(e) {
+    async function handleRexFilesSelect(e) {
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
 
-      let pending = files.length;
-      files.forEach(f => {
-        const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          rexAttachedImages.push({
-            name: f.name,
-            type: isPdf ? 'application/pdf' : (f.type || 'image/png'),
-            size: (f.size / 1024).toFixed(1) + ' Ko',
-            dataUrl: evt.target.result
-          });
-          pending--;
-          if (pending === 0) renderRexFilesPreview();
-        };
-        reader.readAsDataURL(f);
-      });
+      showToast(`Téléversement de ${files.length} pièce(s) jointe(s)...`, 'info');
 
+      for (const f of files) {
+        const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+        let uploadedUrl = await uploadFileToSupabaseStorage(f, 'rex');
+
+        if (!uploadedUrl) {
+          uploadedUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (evt) => resolve(evt.target.result);
+            reader.readAsDataURL(f);
+          });
+        }
+
+        rexAttachedImages.push({
+          name: f.name,
+          type: isPdf ? 'application/pdf' : (f.type || 'image/png'),
+          size: (f.size / 1024).toFixed(1) + ' Ko',
+          dataUrl: uploadedUrl
+        });
+      }
+
+      renderRexFilesPreview();
       e.target.value = '';
     }
 
@@ -2389,7 +2383,7 @@
         const item = document.createElement('div');
         item.className = "relative group rounded-lg overflow-hidden border border-sky-200 bg-slate-50 shadow-sm";
 
-        if (!isPdf && f.dataUrl.startsWith('data:image')) {
+        if (!isPdf && (f.dataUrl.startsWith('data:image') || f.dataUrl.includes('image'))) {
           item.innerHTML = `
             <img src="${f.dataUrl}" class="h-16 w-full object-cover">
             <span class="absolute bottom-0 inset-x-0 bg-slate-900/60 text-white text-[8px] px-1 truncate text-center">${f.name}</span>
@@ -2441,7 +2435,6 @@
       const authorName = state.activeUser ? `${state.activeUser.firstname} ${state.activeUser.lastname} (${state.activeUser.role})` : 'Auteur';
 
       if (editingRexId) {
-        // Modification d'un REX existant
         const rex = state.rexList.find(r => r.id === editingRexId);
         if (rex) {
           rex.nodeId = subId;
@@ -2453,7 +2446,6 @@
           showToast("Amélioration modifiée avec succès !", 'success');
         }
       } else {
-        // Création d'un nouveau REX
         const newRex = {
           id: 'rex_' + Date.now(),
           nodeId: subId,
@@ -2482,7 +2474,6 @@
 
       editingRexId = rex.id;
 
-      // Retrouver la racine associée pour présélectionner les menus déroulants
       const targetNode = state.tree.find(n => n.id === rex.nodeId);
       let rootNode = targetNode;
       while (rootNode && rootNode.parentId !== null) {
@@ -2507,16 +2498,13 @@
         selectSub.value = targetNode.id;
       }
 
-      // Remplissage des champs textuels
       document.getElementById('rex-input-title').value = rex.title || '';
       document.getElementById('rex-input-gain').value = rex.gain || '';
       document.getElementById('rex-input-desc').value = rex.description || '';
 
-      // Chargement des images et documents existants
       rexAttachedImages = rex.images ? [...rex.images] : [];
       renderRexFilesPreview();
 
-      // Ajustement des labels de la modale en mode modification
       document.getElementById('rex-modal-title').innerText = "Modifier l'Amélioration";
       document.getElementById('rex-btn-submit').innerText = "Enregistrer les modifications";
       const icon = document.getElementById('rex-modal-icon');
@@ -2613,7 +2601,7 @@
           ${(rex.images && rex.images.length > 0) ? `
             <h3 style="font-size: 13px; text-transform: uppercase; color: #0284c7; margin-bottom: 8px;">Documents & Photos</h3>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              ${rex.images.map(img => `<img src="${img}" style="max-height: 180px; border-radius: 6px; border: 1px solid #cbd5e1;">`).join('')}
+              ${rex.images.map(img => `<img src="${typeof img === 'object' ? img.dataUrl : img}" style="max-height: 180px; border-radius: 6px; border: 1px solid #cbd5e1;">`).join('')}
             </div>
           ` : ''}
         </div>
@@ -2633,7 +2621,6 @@
       });
     }
 
-    // 12. DRAW.IO & SYNOPTIQUE
     function renderSynoptique() {
       const container = document.getElementById('synoptique-container');
       if (!container) return;
@@ -2668,7 +2655,6 @@
       );
     }
 
-    // 13. COMPTES & AUTHENTIFICATION
     function openCreateUserModal() { document.getElementById('modal-create-user').classList.remove('hidden'); }
     function closeCreateUserModal() { document.getElementById('modal-create-user').classList.add('hidden'); }
 
@@ -2756,13 +2742,12 @@
 
       if (isMatch) {
         state.activeUser = user;
-        // Sauvegarde de la session UNIQUEMENT sur ce poste/navigateur
         try {
           sessionStorage.setItem('meca_local_user', JSON.stringify(user));
         } catch(err) {}
 
         addAuditLog('Connexion', `Connexion de ${user.firstname} ${user.lastname} (${user.role})`);
-        saveState(); // met à jour les logs sur Supabase sans écraser la session des autres
+        saveState();
         applyUserPermissions();
         renderNodeDetail();
         closeLoginModal();
@@ -2792,7 +2777,6 @@
       showToast("Déconnecté. Vous êtes maintenant en mode Invité.", 'info');
     }
 
-    // 14. EXPORT ET IMPORT DE SAUVEGARDE JSON
     function exportBackup() {
       const backupData = {
         exportDate: new Date().toISOString(),
