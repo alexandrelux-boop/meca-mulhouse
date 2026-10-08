@@ -1813,8 +1813,15 @@
       newUploadFilesList = [];
     }
 
-    function saveNode(e) {
+    async function saveNode(e) {
       e.preventDefault();
+
+      // Vérifier qu'un envoi de fichier n'est pas encore en cours
+      const modalProgress = document.getElementById('modal-upload-progress');
+      if (modalProgress && !modalProgress.classList.contains('hidden')) {
+        showToast("Veuillez attendre la fin du téléversement des fichiers.", 'warning');
+        return;
+      }
 
       const isRacine = currentParentId === null;
       const finalFilesList = [...existingFilesList, ...newUploadFilesList];
@@ -1851,11 +1858,14 @@
         addAuditLog('Création Machine', `Création de "${isRacine ? newNode.zoneMk : newNode.name}"`);
       }
 
-      saveState();
+      // Attendre la confirmation d'enregistrement sur Supabase avant de fermer
+      showToast("Enregistrement sur le Cloud en cours...", 'info');
+      await saveState();
+
       closeAddModal();
       renderTree();
       renderNodeDetail();
-      showToast("Machine enregistrée avec succès !", 'success');
+      showToast("Machine enregistrée et synchronisée avec succès !", 'success');
     }
 
     function deleteCurrentNode() {
