@@ -1085,6 +1085,10 @@
 
       document.getElementById('sidebar-btn-add-root').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('sidebar-btn-add-child').style.display = isTechOrAdmin ? 'flex' : 'none';
+      
+      const btnSidebarImport = document.getElementById('sidebar-btn-import-folder');
+      if (btnSidebarImport) btnSidebarImport.style.display = isTechOrAdmin ? 'flex' : 'none';
+
       document.getElementById('btn-add-rex').style.display = isTechOrAdmin ? 'flex' : 'none';
       document.getElementById('btn-edit-synoptique').style.display = isAdmin ? 'flex' : 'none';
       
@@ -2156,13 +2160,193 @@
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
 
-      let folderName = 'Dossier Drive';
-      if (files[0].webkitRelativePath) {
-        folderName = files[0].webkitRelativePath.split('/')[0];
+      const targetParent = editingNodeId 
+        ? editingNodeId 
+        : (currentParentId || state.selectedId);
+
+      closeAddModal();
+      importFolderWithHierarchy(files, targetParent);
+      e.target.value = '';
+    }
+
+    function triggerSidebarFolderImport() {
+      if (!state.selectedId) {
+        showToast("Sélectionnez d'abord une racine ou une machine cible dans l'arborescence.", "warning");
+        return;
+      }
+      const picker = document.getElementById('sidebar-folder-picker');
+      if (picker) picker.click();
+    }
+
+    function handleSidebarFolderUpload(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+
+      if (!state.selectedId) {
+        showToast("Sélectionnez d'abord une racine ou une machine cible.", "warning");
+        return;
       }
 
-      processFilesBatch(files, folderName);
+      importFolderWithHierarchy(files, state.selectedId);
       e.target.value = '';
+    }
+
+    /* MOTEUR D'IMPORTATION ARBORESCENTE COMPLÈTE (DOSSIER & SOUS-DOSSIERS DRIVE) */
+    async function importFolderWithHierarchy(rawFiles, targetParentId) {
+      if (!rawFiles || rawFiles.length === 0) return;
+
+      // 1. Filtrer les fichiers indésirables (.DS_Store, Thumbs.db, temporaires)
+      const validFiles = rawFiles.filter(f => {
+        const name = f.name || '';
+        return !name.startsWith('.') && name !== 'Thumbs.db' && !name.endsWith('.tmp');
+      });
+
+      if (validFiles.length === 0) {
+        showToast("Aucun fichier valide trouvé dans ce dossier.", 'warning');
+        return;
+      }
+
+      const modalProgress = document.getElementById('modal-upload-progress');
+      const progressTitle = document.getElementById('upload-progress-title');
+      const progressDetail = document.getElementById('upload-progress-detail');
+      const progressBar = document.getElementById('upload-progress-bar');
+      const progressPercent = document.getElementById('upload-progress-percent');
+      const progressCount = document.getElementById('upload-progress-count');
+
+      // 2. Extraire le nom du dossier racine importé
+      const firstRelPath = validFiles[0].webkitRelativePath || '';
+      const rootFolderName = firstRelPath ? firstRelPath.split('/')[0] : 'Dossier Drive';
+
+      if (modalProgress) {
+        progressTitle.innerText = `Importation de "${rootFolderName}"...`;
+        progressDetail.innerText = "Construction de l'arborescence des sous-dossiers...";
+        progressBar.style.width = "5%";
+        progressPercent.innerText = "5%";
+        progressCount.innerText = `Analyse de ${validFiles.length} fichier(s)...`;
+        modalProgress.classList.remove('hidden');
+      }
+
+      // 3. Déployer le nœud racine dans l'arborescence sous la cible sélectionnée
+      const rootNode = {
+        id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        parentId: targetParentId,
+        expanded: true,
+        zoneMk: '',
+        name: rootFolderName,
+        files: []
+      };
+      state.tree.push(rootNode);
+
+      const targetParent = state.tree.find(n => n.id === targetParentId);
+      if (targetParent) targetParent.expanded = true;
+
+      // 4. Cartographier et créer chaque niveau de sous-dossier comme sous-machine
+      const folderMap = new Map();
+      folderMap.set('', rootNode);
+      let createdFoldersCount = 1;
+
+      const fileTasks = [];
+
+      for (const f of validFiles) {
+        const relPath = f.webkitRelativePath || '';
+        const parts = relPath.split('/');
+        const dirSegments = parts.slice(1, -1); // Les sous-dossiers intermédiaires
+
+        let currentNode = rootNode;
+        let pathKey = '';
+
+        for (const segment of dirSegments) {
+          pathKey = pathKey ? `${pathKey}/${segment}` : segment;
+
+          if (!folderMap.has(pathKey)) {
+            const newNode = {
+              id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 7) + '_' + createdFoldersCount,
+              parentId: currentNode.id,
+              expanded: true,
+              zoneMk: '',
+              name: segment,
+              files: []
+            };
+            state.tree.push(newNode);
+            folderMap.set(pathKey, newNode);
+            createdFoldersCount++;
+          }
+
+          currentNode = folderMap.get(pathKey);
+        }
+
+        // Associer le fichier au nœud exact de son sous-dossier de base
+        fileTasks.push({ file: f, targetNode: currentNode });
+      }
+
+      // 5. Téléverser les fichiers par lots simultanés et les enregistrer dans leur sous-dossier
+      const total = fileTasks.length;
+      let completed = 0;
+      const CONCURRENCY = 3;
+      let taskIndex = 0;
+
+      async function worker() {
+        while (taskIndex < total) {
+          const currentIndex = taskIndex++;
+          const task = fileTasks[currentIndex];
+          const f = task.file;
+          const targetNode = task.targetNode;
+
+          let publicUrl = await uploadFileToSupabaseStorage(f, 'machines');
+          if (!publicUrl) {
+            publicUrl = await new Promise(resolve => {
+              const reader = new FileReader();
+              reader.onload = ev => resolve(ev.target.result);
+              reader.readAsDataURL(f);
+            });
+          }
+
+          const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+          const fileType = isPdf ? 'application/pdf' : (f.type || 'application/octet-stream');
+
+          targetNode.files.push({
+            name: f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, ''),
+            size: (f.size / 1024).toFixed(1) + ' Ko',
+            type: fileType,
+            dataUrl: publicUrl
+          });
+
+          completed++;
+          const pct = Math.min(90, Math.round((completed / total) * 90));
+          if (progressBar) progressBar.style.width = `${pct}%`;
+          if (progressPercent) progressPercent.innerText = `${pct}%`;
+          if (progressCount) progressCount.innerText = `${completed} / ${total} fichier(s) classé(s)`;
+          if (progressDetail) progressDetail.innerText = `[${targetNode.name}] ${f.name}`;
+        }
+      }
+
+      const workers = [];
+      for (let i = 0; i < Math.min(CONCURRENCY, total); i++) {
+        workers.push(worker());
+      }
+      await Promise.all(workers);
+
+      // 6. Sauvegarde et synchronisation Cloud Supabase finale
+      if (progressDetail) progressDetail.innerText = "Synchronisation et enregistrement sur Supabase Cloud...";
+      if (progressBar) progressBar.style.width = "95%";
+      if (progressPercent) progressPercent.innerText = "95%";
+
+      state.selectedId = rootNode.id;
+      addAuditLog('Import Dossier Arborescence', `"${rootFolderName}" : ${createdFoldersCount} dossier(s), ${total} fichier(s) classés.`);
+      
+      await saveState();
+
+      if (progressBar) progressBar.style.width = "100%";
+      if (progressPercent) progressPercent.innerText = "100%";
+
+      renderTree();
+      renderNodeDetail();
+
+      setTimeout(() => {
+        if (modalProgress) modalProgress.classList.add('hidden');
+      }, 350);
+
+      showToast(`Arborescence "${rootFolderName}" importée avec succès (${createdFoldersCount} dossiers, ${total} fichiers classés) !`, 'success');
     }
 
     function previewExistingFile(index) {
