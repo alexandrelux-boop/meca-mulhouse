@@ -117,12 +117,13 @@
             <input type="text" id="tree-search-input" oninput="handleTreeSearch(event)" placeholder="Filtrer machines/dossiers..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-sky-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-sky-500">
           </div>
 
+          <!-- BOUTONS D'ACTION ARBORESCENCE -->
           <div class="flex flex-col space-y-1.5 pt-1">
-            <button id="sidebar-btn-add-root" onclick="openAddModal(null)" class="w-full flex items-center justify-center space-x-1.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium rounded transition shadow-sm">
+            <button id="sidebar-btn-add-root" onclick="handleAuthAction(() => openAddModal(null), 'Administrateur')" class="w-full flex items-center justify-center space-x-1.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium rounded transition shadow-sm">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>Créer Racine</span>
             </button>
-            <button id="sidebar-btn-add-child" onclick="openAddModalForCurrent()" class="w-full flex items-center justify-center space-x-1.5 py-1.5 bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 text-xs font-medium rounded transition">
+            <button id="sidebar-btn-add-child" onclick="handleAuthAction(() => openAddModalForCurrent(), 'Technicien')" class="w-full flex items-center justify-center space-x-1.5 py-1.5 bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 text-xs font-medium rounded transition">
               <i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-sky-600"></i>
               <span>Créer Sous-Machine</span>
             </button>
@@ -165,15 +166,15 @@
               <i data-lucide="clipboard" class="w-3.5 h-3.5"></i>
               <span>Coller sous-machine</span>
             </button>
-            <button id="btn-edit-node" onclick="openEditModalCurrent()" class="hidden px-3 py-1.5 bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 rounded-lg text-xs font-medium transition items-center space-x-1.5">
+            <button id="btn-edit-node" onclick="handleAuthAction(() => openEditModalCurrent(), 'Technicien')" class="hidden px-3 py-1.5 bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 rounded-lg text-xs font-medium transition items-center space-x-1.5">
               <i data-lucide="pencil" class="w-3.5 h-3.5 text-amber-600"></i>
               <span>Modifier / Gérer fichiers</span>
             </button>
-            <button id="btn-add-rex" onclick="openAddRexModal()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-medium transition flex items-center space-x-1.5 shadow-sm">
+            <button id="btn-add-rex" onclick="handleAuthAction(() => openAddRexModal(), 'Technicien')" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-medium transition flex items-center space-x-1.5 shadow-sm">
               <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
               <span>Publier Amélioration</span>
             </button>
-            <button id="btn-delete-node" onclick="deleteCurrentNode()" class="hidden px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-medium transition items-center space-x-1.5">
+            <button id="btn-delete-node" onclick="handleAuthAction(() => deleteCurrentNode(), 'Administrateur')" class="hidden px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-medium transition items-center space-x-1.5">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               <span>Supprimer</span>
             </button>
@@ -194,7 +195,7 @@
           <h2 class="text-xl font-bold text-slate-900">Synoptique MK</h2>
           <p class="text-xs text-slate-600">Schéma interactif d'ensemble du site de Mulhouse.</p>
         </div>
-        <button id="btn-edit-synoptique" onclick="promptDrawioUrl()" class="px-3 py-1.5 bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 rounded-lg text-xs font-medium flex items-center space-x-2">
+        <button id="btn-edit-synoptique" onclick="handleAuthAction(() => promptDrawioUrl(), 'Administrateur')" class="px-3 py-1.5 bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 rounded-lg text-xs font-medium flex items-center space-x-2">
           <i data-lucide="link" class="w-3.5 h-3.5 text-sky-600"></i>
           <span>Lier/Modifier Draw.io</span>
         </button>
@@ -212,7 +213,7 @@
         </div>
         <div class="flex space-x-2">
           <input type="text" id="rex-search" oninput="renderAllRex()" placeholder="Sous-machine, mot-clé, auteur..." class="bg-white border border-sky-200 rounded-lg px-3 py-2 text-xs text-slate-800 w-80 focus:outline-none focus:border-sky-500">
-          <button onclick="openAddRexModal()" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-2 shadow-sm">
+          <button onclick="handleAuthAction(() => openAddRexModal(), 'Technicien')" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-2 shadow-sm">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
             <span>Nouvelle Amélioration</span>
           </button>
@@ -253,7 +254,7 @@
                 <h2 class="text-xl font-bold text-slate-900 mb-1">Comptes & Utilisateurs</h2>
                 <p class="text-xs text-slate-600">Gérez les comptes d'accès et attribuez les rôles.</p>
               </div>
-              <button id="btn-create-user" onclick="openCreateUserModal()" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-2 shadow-sm">
+              <button id="btn-create-user" onclick="handleAuthAction(() => openCreateUserModal(), 'Administrateur')" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-2 shadow-sm">
                 <i data-lucide="user-plus" class="w-4 h-4"></i>
                 <span>Créer un Utilisateur</span>
               </button>
@@ -266,10 +267,11 @@
                 </div>
                 <div>
                   <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Compte Actif</div>
-                  <h3 id="current-user-fullname" class="font-bold text-slate-900 text-base">Marc D.</h3>
-                  <span id="current-user-badge" class="text-[10px] bg-sky-100 text-sky-700 border border-sky-200 px-2 py-0.5 rounded font-semibold">Administrateur</span>
+                  <h3 id="current-user-fullname" class="font-bold text-slate-900 text-base">Invité</h3>
+                  <span id="current-user-badge" class="text-[10px] bg-sky-100 text-sky-700 border border-sky-200 px-2 py-0.5 rounded font-semibold">Consultateur</span>
                 </div>
               </div>
+              <button onclick="openLoginModal()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-lg shadow-sm">Changer de compte</button>
             </div>
 
             <div class="bg-white/90 border border-sky-200 rounded-xl p-5 space-y-4 shadow-sm">
@@ -285,7 +287,7 @@
                 <h2 class="text-xl font-bold text-slate-900 mb-1">Historique d'Activité & Traçabilité</h2>
                 <p class="text-xs text-slate-600">Journal d'audit en temps réel des actions sur le site de Mulhouse.</p>
               </div>
-              <button onclick="clearAuditLogs()" id="btn-clear-logs" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center space-x-1.5">
+              <button onclick="handleAuthAction(() => clearAuditLogs(), 'Administrateur')" id="btn-clear-logs" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center space-x-1.5">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 <span>Effacer l'historique</span>
               </button>
@@ -326,7 +328,7 @@
                 </div>
               </div>
               <input type="file" id="import-file" accept=".json" onchange="importBackup(event)" class="hidden">
-              <button onclick="document.getElementById('import-file').click()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-2">
+              <button onclick="handleAuthAction(() => document.getElementById('import-file').click(), 'Administrateur')" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-2">
                 <i data-lucide="upload" class="w-4 h-4"></i>
                 <span>Importer une sauvegarde (.json)</span>
               </button>
@@ -469,7 +471,7 @@
           <i id="rex-modal-icon" data-lucide="plus-circle" class="w-5 h-5 text-sky-600"></i>
           <span id="rex-modal-title">Créer une Amélioration</span>
         </h3>
-        <button onclick="closeAddRexModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button onclick="closeAddRexModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
       <form id="form-rex" onsubmit="saveRexForm(event)" class="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
@@ -540,6 +542,29 @@
             <input type="text" id="input-name" class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-sm text-slate-800 focus:outline-none focus:border-sky-500">
           </div>
 
+          <!-- ENCART D'APERÇU DU DOSSIER EN ATTENTE D'IMPORTATION -->
+          <div id="folder-import-preview-box" class="p-3 bg-sky-50 border border-sky-300 rounded-xl space-y-2 hidden">
+            <div class="flex items-center justify-between pb-1.5 border-b border-sky-200">
+              <span class="text-xs font-bold text-sky-900 flex items-center space-x-1.5">
+                <i data-lucide="folder-check" class="w-4 h-4 text-sky-600"></i>
+                <span>Dossier complet prêt à être importé</span>
+              </span>
+              <button type="button" onclick="cancelPendingFolderImport()" class="text-[10px] text-red-600 hover:underline font-semibold">Annuler ce dossier</button>
+            </div>
+            <div id="folder-preview-stats" class="text-xs text-slate-700 space-y-1"></div>
+            <div class="pt-1.5 border-t border-sky-200/60 space-y-1">
+              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Mode d'intégration :</span>
+              <label class="flex items-center space-x-2 text-xs text-slate-800 cursor-pointer">
+                <input type="radio" name="folder-import-mode" value="hierarchy" checked class="text-sky-600 focus:ring-sky-500">
+                <span>Créer l'arborescence complète (sous-dossiers automatiques)</span>
+              </label>
+              <label class="flex items-center space-x-2 text-xs text-slate-800 cursor-pointer">
+                <input type="radio" name="folder-import-mode" value="flat" class="text-sky-600 focus:ring-sky-500">
+                <span>Classer tous les fichiers dans cette seule sous-machine</span>
+              </label>
+            </div>
+          </div>
+
           <div id="existing-files-wrapper" class="hidden space-y-1.5">
             <label class="block text-xs font-semibold text-amber-600 uppercase tracking-wider">Dossiers & Liens enregistrés</label>
             <div id="existing-files-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
@@ -572,7 +597,7 @@
                 <span id="text-machine-folder" class="truncate">Dossier Drive / PC</span>
               </button>
             </div>
-            <p class="text-[10px] text-slate-400">Importe en 1 clic tous les PDF, schémas et documents contenus dans le dossier.</p>
+            <p class="text-[10px] text-slate-400">Importe en 1 clic tous les sous-dossiers, PDF et documents contenus.</p>
           </div>
 
           <div id="uploaded-files-list" class="pt-2 space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
@@ -583,6 +608,36 @@
           <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-medium">Enregistrer</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODALE BARRE DE PROGRESSION DU TÉLÉVERSEMENT -->
+  <div id="modal-upload-progress" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[70] hidden">
+    <div class="bg-white border border-sky-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl text-center">
+      <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center mx-auto">
+        <i data-lucide="cloud-upload" class="w-6 h-6 animate-pulse"></i>
+      </div>
+      <div>
+        <h3 id="upload-progress-title" class="font-bold text-slate-900 text-base">Téléversement sur le Cloud...</h3>
+        <p id="upload-progress-detail" class="text-xs text-slate-500 mt-1 truncate">Préparation des fichiers...</p>
+      </div>
+
+      <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-sky-200 p-0.5">
+        <div id="upload-progress-bar" class="bg-sky-600 h-full rounded-full transition-all duration-300 w-0"></div>
+      </div>
+
+      <div class="flex justify-between items-center text-[11px] text-slate-500 font-semibold px-1">
+        <span id="upload-progress-count">0 / 0</span>
+        <span id="upload-progress-percent">0%</span>
+      </div>
+
+      <!-- BOUTON D'ANNULATION D'URGENCE DU TÉLÉVERSEMENT -->
+      <div class="pt-2 border-t border-sky-100 flex justify-center">
+        <button type="button" onclick="cancelOngoingImport()" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+          <span>Annuler l'importation</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -662,7 +717,7 @@
   </div>
 
   <script>
-    /* NOTIFICATIONS TOAST ET BOITES DE DIALOGUE PERSONNALISÉES */
+    /* 1. NOTIFICATIONS TOAST ET BOITES DE DIALOGUE PERSONNALISÉES */
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -745,6 +800,31 @@
       promptCallback = null;
     }
 
+    /* GESTIONNAIRE D'ACTION AVEC VÉRIFICATION D'AUTHENTIFICATION */
+    function handleAuthAction(actionCallback, requiredRole = 'Technicien') {
+      const user = state.activeUser;
+      const isGuest = !user || user.id === 'guest';
+      const role = user ? user.role : 'Consultateur';
+
+      const roleHierarchy = {
+        'Consultateur': 1,
+        'Technicien': 2,
+        'Administrateur': 3
+      };
+
+      const userRank = roleHierarchy[role] || 1;
+      const reqRank = roleHierarchy[requiredRole] || 2;
+
+      if (isGuest || userRank < reqRank) {
+        showToast(`Action réservée aux comptes ${requiredRole}s. Veuillez vous connecter.`, 'warning');
+        openLoginModal();
+        return;
+      }
+
+      actionCallback();
+    }
+
+    // 2. CONFIGURATION SUPABASE
     const SUPABASE_URL = "https://xhodigctsnwtwwwjmyzt.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_U0YbjQvslDpf1RLGN2rXJA_gOLYvC7j";
     const STORAGE_BUCKET_NAME = "fichiers-meca";
@@ -761,20 +841,27 @@
       console.error("Erreur d'initialisation de Supabase:", err);
     }
 
-    // UPLOAD DIRECT VERS SUPABASE STORAGE (BUCKET)
+    // UPLOAD DIRECT VERS SUPABASE STORAGE
     async function uploadFileToSupabaseStorage(file, folder = 'machines') {
       if (!supabaseClient) return null;
       try {
         const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const filePath = `${folder}/${Date.now()}_${cleanName}`;
+        const filePath = `${folder}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${cleanName}`;
 
-        const { data, error } = await supabaseClient
+        // Protection par Timeout : 12 secondes maximum par fichier pour éviter tout blocage indéfini
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Timeout upload Supabase")), 12000)
+        );
+
+        const uploadPromise = supabaseClient
           .storage
           .from(STORAGE_BUCKET_NAME)
           .upload(filePath, file, {
             cacheControl: '3600',
             upsert: true
           });
+
+        const { data, error } = await Promise.race([uploadPromise, timeoutPromise]);
 
         if (error) {
           console.warn("Storage upload warning:", error);
@@ -788,7 +875,7 @@
 
         return publicData ? publicData.publicUrl : null;
       } catch (e) {
-        console.warn("Échec upload Supabase Storage, bascule en local:", e);
+        console.warn("Échec upload Supabase Storage, bascule en fallback:", e);
         return null;
       }
     }
@@ -810,6 +897,10 @@
     let copiedNodeBuffer = null;
     let currentTreeSearchQuery = "";
     let currentViewerBlobUrl = null;
+    let pendingFolderUploadFiles = null;
+    let lastImportedRootNodeIds = [];
+    let isImportCancelled = false;
+    let currentImportCreatedNodeIds = [];
 
     const GUEST_USER = { 
       id: 'guest', 
@@ -1083,18 +1174,6 @@
       const isAdmin = role === 'Administrateur';
       const isTechOrAdmin = role === 'Administrateur' || role === 'Technicien';
 
-      document.getElementById('sidebar-btn-add-root').style.display = isAdmin ? 'flex' : 'none';
-      document.getElementById('sidebar-btn-add-child').style.display = isTechOrAdmin ? 'flex' : 'none';
-      
-      const btnSidebarImport = document.getElementById('sidebar-btn-import-folder');
-      if (btnSidebarImport) btnSidebarImport.style.display = isTechOrAdmin ? 'flex' : 'none';
-
-      document.getElementById('btn-add-rex').style.display = isTechOrAdmin ? 'flex' : 'none';
-      document.getElementById('btn-edit-synoptique').style.display = isAdmin ? 'flex' : 'none';
-      
-      const btnClearLogs = document.getElementById('btn-clear-logs');
-      if (btnClearLogs) btnClearLogs.style.display = isAdmin ? 'flex' : 'none';
-
       const userFullname = isGuest ? 'Invité' : `${state.activeUser.firstname} ${state.activeUser.lastname}`.trim();
       
       document.getElementById('topbar-user-fullname').innerText = userFullname;
@@ -1283,7 +1362,7 @@
           contentDOM.appendChild(childrenHeaderDOM);
 
           const childrenGridDOM = document.createElement('div');
-          childrenGridDOM.className = "grid grid-cols-3 gap-3 pt-1 mb-2";
+          childrenGridDOM.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1 mb-2";
 
           childNodes.forEach(child => {
             const grandChildrenCount = state.tree.filter(n => n.parentId === child.id).length;
@@ -1371,12 +1450,12 @@
                       <p class="text-[10px] text-sky-700 font-semibold">${groupFiles.length} fichier(s) inclus ${pdfCount > 0 ? `• ${pdfCount} PDF` : ''}</p>
                     </div>
                   </div>
-                  <span class="text-[9px] bg-white text-sky-800 border border-sky-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Dossier Racine</span>
+                  <span class="text-[9px] bg-white text-sky-800 border border-sky-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Dossier</span>
                 </div>
               `;
 
               const folderFilesGrid = document.createElement('div');
-              folderFilesGrid.className = "grid grid-cols-3 gap-2.5";
+              folderFilesGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5";
 
               groupFiles.forEach(f => {
                 folderFilesGrid.appendChild(createFileCardDOM(f));
@@ -1395,7 +1474,7 @@
               }
 
               const directFilesGrid = document.createElement('div');
-              directFilesGrid.className = "grid grid-cols-3 gap-3 pt-1";
+              directFilesGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1";
               directFiles.forEach(f => {
                 directFilesGrid.appendChild(createFileCardDOM(f));
               });
@@ -1482,6 +1561,13 @@
       const isImg = f.type && f.type.startsWith('image/');
       const isPdf = f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf')) || (f.dataUrl && f.dataUrl.includes('application/pdf'));
 
+      const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
+      const deleteBtnHTML = isTechOrAdmin ? `
+        <button type="button" onclick="deleteDirectFile('${f.name.replace(/'/g, "\\'")}', event)" class="p-1 hover:bg-red-100 rounded text-slate-400 hover:text-red-600 transition ml-1" title="Supprimer ce fichier">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+        </button>
+      ` : '';
+
       const card = document.createElement('div');
       card.onclick = () => handleFileClick(f);
 
@@ -1496,6 +1582,7 @@
               <div class="text-xs font-bold text-slate-900 truncate group-hover:text-red-700 transition">${f.name}</div>
               <div class="text-[10px] text-slate-500 mt-0.5"><span class="text-red-600 font-semibold uppercase text-[9px]">PDF</span> • ${f.size || ''}</div>
             </div>
+            ${deleteBtnHTML}
           </div>
           <div class="flex items-center justify-between pt-1 border-t border-sky-100 text-[10px] text-slate-500 group-hover:text-red-700 font-medium">
             <span>Consulter le PDF</span>
@@ -1521,6 +1608,7 @@
               <div class="text-xs font-bold text-slate-900 truncate group-hover:text-sky-700 transition">${f.name}</div>
               <div class="text-[10px] text-slate-500 mt-0.5">${f.size || ''}</div>
             </div>
+            ${deleteBtnHTML}
           </div>
           <div class="flex items-center justify-between pt-1 border-t border-sky-100 text-[10px] text-slate-500 group-hover:text-slate-800">
             <span>${isImg ? 'Prévisualiser' : 'Consulter Lien'}</span>
@@ -1529,6 +1617,20 @@
         `;
       }
       return card;
+    }
+
+    function deleteDirectFile(fileName, e) {
+      if (e) e.stopPropagation();
+      const node = state.tree.find(n => n.id === state.selectedId);
+      if (!node || !node.files) return;
+
+      showConfirmModal("Supprimer le fichier", `Voulez-vous supprimer définitivement "${fileName}" de cette machine ?`, async () => {
+        node.files = node.files.filter(f => f.name !== fileName);
+        addAuditLog('Suppression Fichier', `Suppression de "${fileName}" sur ${node.name || node.zoneMk}`);
+        await saveState();
+        renderNodeDetail();
+        showToast(`Fichier "${fileName}" supprimé avec succès.`, 'info');
+      });
     }
 
     function normalizeRexFile(fileItem, defaultName = 'Document') {
@@ -1594,7 +1696,6 @@
           currentViewerBlobUrl = URL.createObjectURL(blob);
           displayUrl = currentViewerBlobUrl;
         } catch(err) {
-          console.warn("Conversion Blob impossible, utilisation dataUrl:", err);
           displayUrl = normalized.dataUrl;
         }
       }
@@ -1609,7 +1710,7 @@
               </span>
               <a href="${displayUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-[11px] font-semibold flex items-center space-x-1 shrink-0 ml-2 shadow-sm transition">
                 <i data-lucide="external-link" class="w-3 h-3"></i>
-                <span>Ouvrir en plein écran</span>
+                <span>Plein écran</span>
               </a>
             </div>
             <div class="flex-1 w-full h-full relative bg-slate-100">
@@ -1617,9 +1718,9 @@
                 <iframe src="${displayUrl}" class="w-full h-full border-0">
                   <div class="h-full flex flex-col items-center justify-center p-6 text-center space-y-3 bg-white">
                     <i data-lucide="file-text" class="w-12 h-12 text-red-500"></i>
-                    <p class="text-xs text-slate-700 font-medium">Votre navigateur ne prend pas en charge l'affichage direct des PDF dans cette fenêtre.</p>
+                    <p class="text-xs text-slate-700 font-medium">Prévisualisation intégrée non supportée par votre navigateur.</p>
                     <a href="${displayUrl}" target="_blank" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold shadow-sm">
-                      Ouvrir le document PDF
+                      Ouvrir le PDF
                     </a>
                   </div>
                 </iframe>
@@ -1755,741 +1856,6 @@
       document.getElementById('modal-rex-detail').classList.add('hidden');
     }
 
-    function openAddModal(parentId) {
-      editingNodeId = null;
-      currentParentId = parentId;
-      existingFilesList = [];
-      newUploadFilesList = [];
-
-      const isRacine = parentId === null;
-
-      document.getElementById('modal-title').innerText = isRacine ? "Créer une Racine" : "Créer une Sous-Machine";
-      document.getElementById('form-add-node').reset();
-
-      document.getElementById('field-zone-container').style.display = isRacine ? 'block' : 'none';
-      document.getElementById('field-drive-container').style.display = isRacine ? 'none' : 'block';
-
-      renderExistingFilesUI();
-      updateUploadedFilesListUI();
-      document.getElementById('modal-add-node').classList.remove('hidden');
-    }
-
-    function openAddModalForCurrent() {
-      if (!state.selectedId) {
-        showToast("Sélectionnez d'abord un élément parent.", 'warning');
-        return;
-      }
-      openAddModal(state.selectedId);
-    }
-
-    function openEditModalCurrent() {
-      if (!state.selectedId) return;
-      const node = state.tree.find(n => n.id === state.selectedId);
-      if (!node) return;
-
-      editingNodeId = node.id;
-      currentParentId = node.parentId;
-      existingFilesList = node.files ? [...node.files] : [];
-      newUploadFilesList = [];
-
-      const isRacine = node.parentId === null;
-
-      document.getElementById('modal-title').innerText = "Modifier l'élément";
-      document.getElementById('field-zone-container').style.display = isRacine ? 'block' : 'none';
-      document.getElementById('field-drive-container').style.display = isRacine ? 'none' : 'block';
-
-      if (isRacine) {
-        document.getElementById('input-zone').value = node.zoneMk || '';
-      } else {
-        document.getElementById('input-name').value = node.name || '';
-        renderExistingFilesUI();
-        updateUploadedFilesListUI();
-      }
-
-      document.getElementById('modal-add-node').classList.remove('hidden');
-    }
-
-    function closeAddModal() {
-      document.getElementById('modal-add-node').classList.add('hidden');
-      document.getElementById('form-add-node').reset();
-      editingNodeId = null;
-      existingFilesList = [];
-      newUploadFilesList = [];
-    }
-
-    async function saveNode(e) {
-      e.preventDefault();
-
-      // Vérifier qu'un envoi de fichier n'est pas encore en cours
-      const modalProgress = document.getElementById('modal-upload-progress');
-      if (modalProgress && !modalProgress.classList.contains('hidden')) {
-        showToast("Veuillez attendre la fin du téléversement des fichiers.", 'warning');
-        return;
-      }
-
-      const isRacine = currentParentId === null;
-      const finalFilesList = [...existingFilesList, ...newUploadFilesList];
-
-      if (editingNodeId) {
-        const node = state.tree.find(n => n.id === editingNodeId);
-        if (node) {
-          if (isRacine) {
-            node.zoneMk = document.getElementById('input-zone').value;
-          } else {
-            node.name = document.getElementById('input-name').value;
-            node.files = finalFilesList;
-          }
-          addAuditLog('Modification Machine', `Mise à jour de "${isRacine ? node.zoneMk : node.name}"`);
-        }
-      } else {
-        const newNode = {
-          id: 'node_' + Date.now(),
-          parentId: currentParentId,
-          expanded: true,
-          zoneMk: isRacine ? document.getElementById('input-zone').value : '',
-          name: isRacine ? '' : document.getElementById('input-name').value,
-          files: isRacine ? [] : finalFilesList
-        };
-
-        state.tree.push(newNode);
-
-        if (currentParentId) {
-          const parent = state.tree.find(n => n.id === currentParentId);
-          if (parent) parent.expanded = true;
-        }
-
-        state.selectedId = newNode.id;
-        addAuditLog('Création Machine', `Création de "${isRacine ? newNode.zoneMk : newNode.name}"`);
-      }
-
-      // Attendre la confirmation d'enregistrement sur Supabase avant de fermer
-      showToast("Enregistrement sur le Cloud en cours...", 'info');
-      await saveState();
-
-      closeAddModal();
-      renderTree();
-      renderNodeDetail();
-      showToast("Machine enregistrée et synchronisée avec succès !", 'success');
-    }
-
-    function deleteCurrentNode() {
-      if (!state.selectedId) return;
-      const nodeToDelete = state.tree.find(n => n.id === state.selectedId);
-      if (!nodeToDelete) return;
-
-      const name = nodeToDelete.parentId === null ? nodeToDelete.zoneMk : nodeToDelete.name;
-
-      showConfirmModal(
-        "Supprimer l'élément",
-        `Voulez-vous vraiment supprimer "${name}" ainsi que toutes ses sous-machines ?`,
-        () => {
-          const idsToDelete = [nodeToDelete.id];
-          function collectChildren(parentId) {
-            const children = state.tree.filter(n => n.parentId === parentId);
-            children.forEach(c => {
-              idsToDelete.push(c.id);
-              collectChildren(c.id);
-            });
-          }
-          collectChildren(nodeToDelete.id);
-
-          state.tree = state.tree.filter(n => !idsToDelete.includes(n.id));
-          state.rexList = state.rexList.filter(r => !idsToDelete.includes(r.nodeId));
-          state.selectedId = state.tree.length > 0 ? state.tree[0].id : null;
-
-          addAuditLog('Suppression Machine', `Suppression de "${name}" et ses enfants.`);
-          saveState();
-          renderTree();
-          renderNodeDetail();
-          showToast(`"${name}" a été supprimé.`, 'info');
-        }
-      );
-    }
-
-    function copyCurrentNode() {
-      if (!state.selectedId) return;
-      const nodeToCopy = state.tree.find(n => n.id === state.selectedId);
-      if (!nodeToCopy || nodeToCopy.parentId === null) {
-        showToast("Sélectionnez une sous-machine à copier.", 'warning');
-        return;
-      }
-
-      copiedNodeBuffer = JSON.parse(JSON.stringify(nodeToCopy));
-
-      let totalNodes = 1;
-      let totalFiles = (copiedNodeBuffer.files || []).length;
-      function countTreeStats(node) {
-        const children = state.tree.filter(n => n.parentId === node.id);
-        totalNodes += children.length;
-        children.forEach(c => {
-          totalFiles += (c.files || []).length;
-          countTreeStats(c);
-        });
-      }
-      countTreeStats(nodeToCopy);
-      
-      const badge = document.getElementById('copied-badge');
-      const badgeText = document.getElementById('copied-badge-text');
-      badgeText.innerText = `Copié : "${copiedNodeBuffer.name}" (${totalNodes} élément(s), ${totalFiles} fichier(s)) — Prêt à coller (Ctrl+V)`;
-      badge.classList.remove('hidden');
-
-      renderNodeDetail();
-      showToast(`"${copiedNodeBuffer.name}" copié (${totalFiles} fichier(s)). Prêt à coller (Ctrl+V ou bouton).`, 'success');
-    }
-
-    async function pasteCopiedNode() {
-      if (!copiedNodeBuffer) {
-        showToast("Aucune sous-machine en mémoire à coller.", 'warning');
-        return;
-      }
-      if (!state.selectedId) {
-        showToast("Sélectionnez la machine cible dans laquelle coller.", 'warning');
-        return;
-      }
-
-      const targetParent = state.tree.find(n => n.id === state.selectedId);
-      if (!targetParent) return;
-
-      // Afficher l'overlay de progression identique à l'injection
-      const modalProgress = document.getElementById('modal-upload-progress');
-      const progressTitle = document.getElementById('upload-progress-title');
-      const progressDetail = document.getElementById('upload-progress-detail');
-      const progressBar = document.getElementById('upload-progress-bar');
-      const progressPercent = document.getElementById('upload-progress-percent');
-
-      if (modalProgress) {
-        progressTitle.innerText = "Duplication en cours...";
-        progressDetail.innerText = `Duplication de "${copiedNodeBuffer.name}" et de ses fichiers...`;
-        progressBar.style.width = "35%";
-        progressPercent.innerText = "35%";
-        modalProgress.classList.remove('hidden');
-      }
-
-      let clonedCount = 0;
-      let clonedFilesCount = 0;
-
-      function duplicateNodeRecursive(sourceNode, targetParentId) {
-        const newId = 'node_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-        const newNode = {
-          ...JSON.parse(JSON.stringify(sourceNode)),
-          id: newId,
-          parentId: targetParentId,
-          name: sourceNode.name ? (targetParentId === sourceNode.parentId ? sourceNode.name + ' (Copie)' : sourceNode.name) : 'Sous-machine'
-        };
-
-        state.tree.push(newNode);
-        clonedCount++;
-        clonedFilesCount += (newNode.files || []).length;
-
-        const originalRexs = state.rexList.filter(r => r.nodeId === sourceNode.id);
-        originalRexs.forEach(rex => {
-          state.rexList.push({
-            ...JSON.parse(JSON.stringify(rex)),
-            id: 'rex_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now(),
-            nodeId: newId
-          });
-        });
-
-        const children = state.tree.filter(n => n.parentId === sourceNode.id);
-        children.forEach(child => duplicateNodeRecursive(child, newId));
-
-        return newId;
-      }
-
-      try {
-        const createdId = duplicateNodeRecursive(copiedNodeBuffer, targetParent.id);
-        targetParent.expanded = true;
-        state.selectedId = createdId;
-
-        if (progressBar) {
-          progressBar.style.width = "75%";
-          progressPercent.innerText = "75%";
-          progressDetail.innerText = "Synchronisation et enregistrement sur Supabase Cloud...";
-        }
-
-        addAuditLog('Duplication Machine', `Duplication de "${copiedNodeBuffer.name}" (${clonedCount} élément(s), ${clonedFilesCount} fichier(s))`);
-        
-        // Attente impérative de l'enregistrement Cloud pour éviter les pertes au rafraîchissement
-        await saveState();
-
-        if (progressBar) {
-          progressBar.style.width = "100%";
-          progressPercent.innerText = "100%";
-        }
-
-        renderTree();
-        renderNodeDetail();
-        showToast(`Dossier dupliqué avec succès (${clonedCount} élément(s), ${clonedFilesCount} fichier(s)) !`, 'success');
-      } catch (err) {
-        console.error("Erreur duplication :", err);
-        showToast("Erreur lors de la duplication des dossiers.", 'error');
-      } finally {
-        setTimeout(() => {
-          if (modalProgress) modalProgress.classList.add('hidden');
-        }, 300);
-      }
-    }
-
-    document.addEventListener('keydown', (e) => {
-      // Ignorer si l'utilisateur saisit dans un champ de formulaire
-      const activeTag = document.activeElement ? document.activeElement.tagName : '';
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) return;
-
-      const isModifier = e.ctrlKey || e.metaKey;
-      if (isModifier && e.key.toLowerCase() === 'c') {
-        const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
-        if (isTechOrAdmin && state.selectedId) {
-          e.preventDefault();
-          copyCurrentNode();
-        }
-      } else if (isModifier && e.key.toLowerCase() === 'v') {
-        const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
-        if (isTechOrAdmin && copiedNodeBuffer && state.selectedId) {
-          e.preventDefault();
-          pasteCopiedNode();
-        }
-      }
-    });
-
-    // Permet de coller des fichiers copiés sur l'ordinateur directement dans la modale machine (Ctrl+V)
-    document.addEventListener('paste', (e) => {
-      const modalAddNode = document.getElementById('modal-add-node');
-      if (modalAddNode && !modalAddNode.classList.contains('hidden')) {
-        if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
-          e.preventDefault();
-          processFilesBatch(Array.from(e.clipboardData.files));
-        }
-      }
-    });
-
-    function addGoogleDriveLink() {
-      const titleInput = document.getElementById('input-gdrive-title');
-      const urlInput = document.getElementById('input-gdrive-url');
-
-      const title = titleInput.value.trim();
-      const url = urlInput.value.trim();
-
-      if (!url) {
-        showToast("Veuillez saisir une URL valide.", 'warning');
-        return;
-      }
-
-      let type = 'googledrive';
-      if (url.includes('docs.google.com/spreadsheets') || url.includes('sheet')) type = 'googlesheet';
-      else if (url.includes('docs.google.com/document') || url.includes('doc')) type = 'googledoc';
-
-      const fileObj = {
-        name: title || (type === 'googlesheet' ? 'Google Sheet' : (type === 'googledoc' ? 'Google Doc' : 'Dossier Google Drive')),
-        size: 'Lien Google Cloud',
-        type: type,
-        dataUrl: url
-      };
-
-      newUploadFilesList.push(fileObj);
-      titleInput.value = '';
-      urlInput.value = '';
-      updateUploadedFilesListUI();
-      showToast("Lien Google Drive ajouté.", 'success');
-    }
-
-    async function processFilesBatch(files, folderName = null) {
-      if (!files || files.length === 0) return;
-
-      const validFiles = files.filter(f => !f.name.startsWith('.') && f.name !== 'Thumbs.db');
-      if (validFiles.length === 0) {
-        showToast("Aucun fichier valide trouvé dans ce dossier.", 'warning');
-        return;
-      }
-
-      const nameInput = document.getElementById('input-name');
-      if (folderName && nameInput && !nameInput.value.trim()) {
-        nameInput.value = folderName;
-      }
-
-      showToast(`Téléversement de ${validFiles.length} fichier(s)...`, 'info');
-
-      for (const f of validFiles) {
-        const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
-        let fileType = isPdf ? 'application/pdf' : (f.type || 'application/octet-stream');
-        
-        let publicUrl = await uploadFileToSupabaseStorage(f, 'machines');
-        let finalDataUrl = publicUrl;
-
-        if (!finalDataUrl) {
-          finalDataUrl = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (evt) => resolve(evt.target.result);
-            reader.readAsDataURL(f);
-          });
-        }
-
-        let displayName = f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, '');
-        const relPath = f.webkitRelativePath || '';
-        if (relPath) {
-          const parts = relPath.split('/');
-          if (parts.length > 2) {
-            displayName = parts.slice(1, -1).join('/') + '/' + displayName;
-          }
-        }
-
-        newUploadFilesList.push({
-          name: displayName,
-          folder: folderName || null,
-          relativePath: relPath,
-          size: (f.size / 1024).toFixed(1) + ' Ko',
-          type: fileType,
-          dataUrl: finalDataUrl
-        });
-      }
-
-      updateUploadedFilesListUI();
-      if (folderName) {
-        showToast(`Dossier racine "${folderName}" synchronisé (${validFiles.length} fichier(s)) !`, 'success');
-      } else {
-        showToast(`${validFiles.length} fichier(s) synchronisé(s).`, 'success');
-      }
-    }
-
-    function handleMachineFilesUpload(e) {
-      const files = Array.from(e.target.files);
-      processFilesBatch(files);
-      e.target.value = '';
-    }
-
-    function handleMachineFolderUpload(e) {
-      const files = Array.from(e.target.files);
-      if (files.length === 0) return;
-
-      const targetParent = editingNodeId 
-        ? editingNodeId 
-        : (currentParentId || state.selectedId);
-
-      closeAddModal();
-      importFolderWithHierarchy(files, targetParent);
-      e.target.value = '';
-    }
-
-    function triggerSidebarFolderImport() {
-      if (!state.selectedId) {
-        showToast("Sélectionnez d'abord une racine ou une machine cible dans l'arborescence.", "warning");
-        return;
-      }
-      const picker = document.getElementById('sidebar-folder-picker');
-      if (picker) picker.click();
-    }
-
-    function handleSidebarFolderUpload(e) {
-      const files = Array.from(e.target.files);
-      if (files.length === 0) return;
-
-      if (!state.selectedId) {
-        showToast("Sélectionnez d'abord une racine ou une machine cible.", "warning");
-        return;
-      }
-
-      importFolderWithHierarchy(files, state.selectedId);
-      e.target.value = '';
-    }
-
-    /* MOTEUR D'IMPORTATION ARBORESCENTE COMPLÈTE (DOSSIER & SOUS-DOSSIERS DRIVE) */
-    async function importFolderWithHierarchy(rawFiles, targetParentId) {
-      if (!rawFiles || rawFiles.length === 0) return;
-
-      // 1. Filtrer les fichiers indésirables (.DS_Store, Thumbs.db, temporaires)
-      const validFiles = rawFiles.filter(f => {
-        const name = f.name || '';
-        return !name.startsWith('.') && name !== 'Thumbs.db' && !name.endsWith('.tmp');
-      });
-
-      if (validFiles.length === 0) {
-        showToast("Aucun fichier valide trouvé dans ce dossier.", 'warning');
-        return;
-      }
-
-      const modalProgress = document.getElementById('modal-upload-progress');
-      const progressTitle = document.getElementById('upload-progress-title');
-      const progressDetail = document.getElementById('upload-progress-detail');
-      const progressBar = document.getElementById('upload-progress-bar');
-      const progressPercent = document.getElementById('upload-progress-percent');
-      const progressCount = document.getElementById('upload-progress-count');
-
-      // 2. Extraire le nom du dossier racine importé
-      const firstRelPath = validFiles[0].webkitRelativePath || '';
-      const rootFolderName = firstRelPath ? firstRelPath.split('/')[0] : 'Dossier Drive';
-
-      if (modalProgress) {
-        progressTitle.innerText = `Importation de "${rootFolderName}"...`;
-        progressDetail.innerText = "Construction de l'arborescence des sous-dossiers...";
-        progressBar.style.width = "5%";
-        progressPercent.innerText = "5%";
-        progressCount.innerText = `Analyse de ${validFiles.length} fichier(s)...`;
-        modalProgress.classList.remove('hidden');
-      }
-
-      // 3. Déployer le nœud racine dans l'arborescence sous la cible sélectionnée
-      const rootNode = {
-        id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-        parentId: targetParentId,
-        expanded: true,
-        zoneMk: '',
-        name: rootFolderName,
-        files: []
-      };
-      state.tree.push(rootNode);
-
-      const targetParent = state.tree.find(n => n.id === targetParentId);
-      if (targetParent) targetParent.expanded = true;
-
-      // 4. Cartographier et créer chaque niveau de sous-dossier comme sous-machine
-      const folderMap = new Map();
-      folderMap.set('', rootNode);
-      let createdFoldersCount = 1;
-
-      const fileTasks = [];
-
-      for (const f of validFiles) {
-        const relPath = f.webkitRelativePath || '';
-        const parts = relPath.split('/');
-        const dirSegments = parts.slice(1, -1); // Les sous-dossiers intermédiaires
-
-        let currentNode = rootNode;
-        let pathKey = '';
-
-        for (const segment of dirSegments) {
-          pathKey = pathKey ? `${pathKey}/${segment}` : segment;
-
-          if (!folderMap.has(pathKey)) {
-            const newNode = {
-              id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 7) + '_' + createdFoldersCount,
-              parentId: currentNode.id,
-              expanded: true,
-              zoneMk: '',
-              name: segment,
-              files: []
-            };
-            state.tree.push(newNode);
-            folderMap.set(pathKey, newNode);
-            createdFoldersCount++;
-          }
-
-          currentNode = folderMap.get(pathKey);
-        }
-
-        // Associer le fichier au nœud exact de son sous-dossier de base
-        fileTasks.push({ file: f, targetNode: currentNode });
-      }
-
-      // 5. Téléverser les fichiers par lots simultanés et les enregistrer dans leur sous-dossier
-      const total = fileTasks.length;
-      let completed = 0;
-      const CONCURRENCY = 3;
-      let taskIndex = 0;
-
-      async function worker() {
-        while (taskIndex < total) {
-          const currentIndex = taskIndex++;
-          const task = fileTasks[currentIndex];
-          const f = task.file;
-          const targetNode = task.targetNode;
-
-          let publicUrl = await uploadFileToSupabaseStorage(f, 'machines');
-          if (!publicUrl) {
-            publicUrl = await new Promise(resolve => {
-              const reader = new FileReader();
-              reader.onload = ev => resolve(ev.target.result);
-              reader.readAsDataURL(f);
-            });
-          }
-
-          const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
-          const fileType = isPdf ? 'application/pdf' : (f.type || 'application/octet-stream');
-
-          targetNode.files.push({
-            name: f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, ''),
-            size: (f.size / 1024).toFixed(1) + ' Ko',
-            type: fileType,
-            dataUrl: publicUrl
-          });
-
-          completed++;
-          const pct = Math.min(90, Math.round((completed / total) * 90));
-          if (progressBar) progressBar.style.width = `${pct}%`;
-          if (progressPercent) progressPercent.innerText = `${pct}%`;
-          if (progressCount) progressCount.innerText = `${completed} / ${total} fichier(s) classé(s)`;
-          if (progressDetail) progressDetail.innerText = `[${targetNode.name}] ${f.name}`;
-        }
-      }
-
-      const workers = [];
-      for (let i = 0; i < Math.min(CONCURRENCY, total); i++) {
-        workers.push(worker());
-      }
-      await Promise.all(workers);
-
-      // 6. Sauvegarde et synchronisation Cloud Supabase finale
-      if (progressDetail) progressDetail.innerText = "Synchronisation et enregistrement sur Supabase Cloud...";
-      if (progressBar) progressBar.style.width = "95%";
-      if (progressPercent) progressPercent.innerText = "95%";
-
-      state.selectedId = rootNode.id;
-      addAuditLog('Import Dossier Arborescence', `"${rootFolderName}" : ${createdFoldersCount} dossier(s), ${total} fichier(s) classés.`);
-      
-      await saveState();
-
-      if (progressBar) progressBar.style.width = "100%";
-      if (progressPercent) progressPercent.innerText = "100%";
-
-      renderTree();
-      renderNodeDetail();
-
-      setTimeout(() => {
-        if (modalProgress) modalProgress.classList.add('hidden');
-      }, 350);
-
-      showToast(`Arborescence "${rootFolderName}" importée avec succès (${createdFoldersCount} dossiers, ${total} fichiers classés) !`, 'success');
-    }
-
-    function previewExistingFile(index) {
-      const file = existingFilesList[index];
-      if (file) handleFileClick(file);
-    }
-
-    function previewNewFile(index) {
-      const file = newUploadFilesList[index];
-      if (file) handleFileClick(file);
-    }
-
-    function removeExistingFile(index) {
-      existingFilesList.splice(index, 1);
-      renderExistingFilesUI();
-    }
-
-    function removeNewFile(index) {
-      newUploadFilesList.splice(index, 1);
-      updateUploadedFilesListUI();
-    }
-
-    function renderExistingFilesUI() {
-      const wrapper = document.getElementById('existing-files-wrapper');
-      const container = document.getElementById('existing-files-list');
-
-      if (!existingFilesList || existingFilesList.length === 0) {
-        wrapper.classList.add('hidden');
-        container.innerHTML = '';
-        return;
-      }
-
-      wrapper.classList.remove('hidden');
-
-      const groups = {};
-      const loose = [];
-      existingFilesList.forEach((f, idx) => {
-        const fldr = f.folder || (f.relativePath ? f.relativePath.split('/')[0] : null);
-        if (fldr) {
-          if (!groups[fldr]) groups[fldr] = [];
-          groups[fldr].push({ file: f, index: idx });
-        } else {
-          loose.push({ file: f, index: idx });
-        }
-      });
-
-      let html = '';
-
-      Object.keys(groups).forEach(fldr => {
-        html += `
-          <div class="p-2 bg-sky-50 rounded-lg border border-sky-300 space-y-1.5 mb-2">
-            <div class="flex items-center space-x-1.5 text-sky-800 text-[11px] font-bold">
-              <i data-lucide="folder-check" class="w-3.5 h-3.5 text-sky-600"></i>
-              <span>Dossier : ${fldr} (${groups[fldr].length} fichier(s))</span>
-            </div>
-            <div class="space-y-1 pl-2 border-l border-sky-200">
-              ${groups[fldr].map(item => renderFileRowItem(item.file, item.index, true)).join('')}
-            </div>
-          </div>
-        `;
-      });
-
-      if (loose.length > 0) {
-        html += loose.map(item => renderFileRowItem(item.file, item.index, true)).join('');
-      }
-
-      container.innerHTML = html;
-      lucide.createIcons();
-    }
-
-    function updateUploadedFilesListUI() {
-      const listContainer = document.getElementById('uploaded-files-list');
-
-      if (newUploadFilesList.length === 0) {
-        listContainer.innerHTML = '';
-        document.getElementById('text-machine-files').innerText = "Fichiers / PDF";
-        document.getElementById('text-machine-folder').innerText = "Dossier Drive / PC";
-        return;
-      }
-
-      const groups = {};
-      const loose = [];
-      newUploadFilesList.forEach((f, idx) => {
-        const fldr = f.folder || (f.relativePath ? f.relativePath.split('/')[0] : null);
-        if (fldr) {
-          if (!groups[fldr]) groups[fldr] = [];
-          groups[fldr].push({ file: f, index: idx });
-        } else {
-          loose.push({ file: f, index: idx });
-        }
-      });
-
-      let html = '';
-
-      Object.keys(groups).forEach(fldr => {
-        html += `
-          <div class="p-2 bg-sky-100/70 rounded-lg border border-sky-300 space-y-1.5 mb-2">
-            <div class="flex items-center space-x-1.5 text-sky-900 text-[11px] font-bold">
-              <i data-lucide="folder-up" class="w-3.5 h-3.5 text-sky-700"></i>
-              <span>Dossier : ${fldr} (${groups[fldr].length} fichier(s))</span>
-            </div>
-            <div class="space-y-1 pl-2 border-l border-sky-300">
-              ${groups[fldr].map(item => renderFileRowItem(item.file, item.index, false)).join('')}
-            </div>
-          </div>
-        `;
-      });
-
-      if (loose.length > 0) {
-        html += loose.map(item => renderFileRowItem(item.file, item.index, false)).join('');
-      }
-
-      listContainer.innerHTML = html;
-      document.getElementById('text-machine-files').innerText = `${newUploadFilesList.length} fichier(s) prêt(s)`;
-      lucide.createIcons();
-    }
-
-    function renderFileRowItem(f, idx, isExisting = false) {
-      const isPdf = f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf'));
-      const isImg = f.type && f.type.startsWith('image/');
-      const previewFn = isExisting ? `previewExistingFile(${idx})` : `previewNewFile(${idx})`;
-      const removeFn = isExisting ? `removeExistingFile(${idx})` : `removeNewFile(${idx})`;
-
-      return `
-        <div class="flex items-center justify-between p-1.5 bg-white/90 rounded border border-sky-200 text-xs">
-          <div class="truncate flex items-center space-x-2 flex-1 cursor-pointer" onclick="${previewFn}">
-            <i data-lucide="${isPdf ? 'file-text' : (isImg ? 'image' : 'file')}" class="w-3.5 h-3.5 ${isPdf ? 'text-red-600' : 'text-sky-600'} shrink-0"></i>
-            <span class="truncate text-slate-800 font-semibold hover:text-sky-600">${f.name}</span>
-            <span class="text-[9px] text-slate-400">(${f.size || ''})</span>
-            ${isPdf ? '<span class="text-[8px] bg-red-100 text-red-700 px-1 py-0.5 rounded font-bold uppercase shrink-0">PDF</span>' : ''}
-          </div>
-          <div class="flex items-center space-x-1 shrink-0 ml-1">
-            <button type="button" onclick="${previewFn}" class="p-1 hover:bg-sky-100 rounded text-sky-600 transition" title="Consulter">
-              <i data-lucide="eye" class="w-3 h-3"></i>
-            </button>
-            <button type="button" onclick="${removeFn}" class="p-1 hover:bg-red-100 rounded text-red-600 transition" title="Retirer">
-              <i data-lucide="trash-2" class="w-3 h-3"></i>
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
     function renderAllRex() {
       const container = document.getElementById('all-rex-container');
       if (!container) return;
@@ -2525,90 +1891,66 @@
       const node = state.tree.find(n => n.id === rex.nodeId);
       const nodeName = node ? (node.parentId === null ? node.zoneMk : node.name) : 'Mulhouse';
       const isGuest = !state.activeUser || state.activeUser.id === 'guest';
+      const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
 
-      const attachments = (rex.images || []).map((img, i) => normalizeRexFile(img, `Fichier ${i + 1}`)).filter(Boolean);
+      const card = document.createElement('div');
+      card.className = "bg-white/90 border border-sky-200 rounded-xl p-4 space-y-2 relative shadow-sm hover:border-sky-400 cursor-pointer transition";
+      card.onclick = () => openRexDetailModal(rex.id);
 
-      let filesHTML = '';
-      if (attachments.length > 0) {
+      let mediaSnippet = '';
+      if (rex.images && rex.images.length > 0) {
         if (isGuest) {
-          filesHTML = `
-            <div class="flex items-center space-x-1.5 pt-2 border-t border-sky-100 text-[10px] text-slate-500">
-              <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
-              <span>${attachments.length} document(s) joint(s) — Connectez-vous pour consulter</span>
+          mediaSnippet = `
+            <div class="flex items-center space-x-1 text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded w-fit mt-1">
+              <i data-lucide="lock" class="w-3 h-3"></i>
+              <span>${rex.images.length} document(s) protégé(s)</span>
             </div>
           `;
         } else {
-          filesHTML = `
-            <div class="flex flex-wrap gap-2 pt-2 border-t border-sky-100">
-              ${attachments.map((f, i) => {
-                const isPdf = f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf'));
-                if (!isPdf && (f.dataUrl.startsWith('data:image') || f.dataUrl.includes('image'))) {
-                  return `
-                    <div onclick="event.stopPropagation(); openViewerModal(rexAttachedFilesMap['${rex.id}_${i}'])" class="relative group h-14 w-20 rounded-lg overflow-hidden border border-sky-200 cursor-pointer hover:border-sky-400 transition shadow-sm">
-                      <img src="${f.dataUrl}" class="h-full w-full object-cover group-hover:scale-105 transition">
-                      <span class="absolute bottom-0 inset-x-0 bg-slate-900/60 text-white text-[8px] px-1 truncate text-center">${f.name}</span>
-                    </div>
-                  `;
-                } else {
-                  return `
-                    <div onclick="event.stopPropagation(); openViewerModal(rexAttachedFilesMap['${rex.id}_${i}'])" class="h-14 px-2.5 rounded-lg border border-red-200 bg-red-50/70 hover:bg-red-100/80 cursor-pointer flex items-center space-x-2 transition shadow-sm">
-                      <i data-lucide="file-text" class="w-5 h-5 text-red-600 shrink-0"></i>
-                      <div class="text-left truncate max-w-[130px]">
-                        <div class="text-[10px] font-bold text-slate-800 truncate">${f.name}</div>
-                        <div class="text-[8px] text-red-700 font-semibold uppercase">PDF • Consulter</div>
-                      </div>
-                    </div>
-                  `;
+          mediaSnippet = `
+            <div class="flex space-x-2 pt-1 overflow-x-auto">
+              ${rex.images.slice(0, 4).map(img => {
+                const norm = normalizeRexFile(img);
+                if (norm.type === 'application/pdf') {
+                  return `<div class="h-14 w-20 rounded bg-red-50 border border-red-200 flex flex-col items-center justify-center text-[9px] text-red-700 font-bold shrink-0"><i data-lucide="file-text" class="w-4 h-4 mb-0.5"></i>PDF</div>`;
                 }
+                return `<img src="${norm.dataUrl}" class="h-14 w-20 object-cover rounded border border-sky-200 shrink-0">`;
               }).join('')}
+              ${rex.images.length > 4 ? `<div class="h-14 w-12 rounded bg-sky-50 border border-sky-200 flex items-center justify-center text-[10px] text-sky-700 font-bold shrink-0">+${rex.images.length - 4}</div>` : ''}
             </div>
           `;
         }
       }
 
-      if (!window.rexAttachedFilesMap) window.rexAttachedFilesMap = {};
-      attachments.forEach((f, i) => {
-        window.rexAttachedFilesMap[`${rex.id}_${i}`] = f;
-      });
-
-      const card = document.createElement('div');
-      card.className = "bg-white/95 hover:bg-white border border-sky-200 hover:border-sky-300 rounded-xl p-4 space-y-2.5 relative shadow-sm cursor-pointer transition";
-      card.onclick = () => openRexDetailModal(rex.id);
-
       card.innerHTML = `
         <div class="flex justify-between items-start">
-          <div class="space-y-0.5">
-            <span class="text-[10px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded border border-sky-200 font-bold uppercase tracking-wider">${nodeName}</span>
-            <h3 class="text-base font-bold text-slate-900 hover:text-sky-700 transition mt-1">${rex.title}</h3>
+          <div>
+            <span class="text-[10px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded border border-sky-200 font-semibold">${nodeName}</span>
+            <h3 class="text-base font-bold text-slate-900 mt-1">${rex.title}</h3>
             <div class="text-[11px] text-slate-500">Par ${rex.author} • ${rex.date}</div>
           </div>
           <div class="flex space-x-1" onclick="event.stopPropagation()">
-            <button onclick="printSingleRex('${rex.id}')" class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition" title="Imprimer cette fiche REX"><i data-lucide="printer" class="w-4 h-4"></i></button>
-            <button onclick="editRex('${rex.id}', event)" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-sky-50 rounded-lg transition" title="Modifier le REX"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-            <button onclick="deleteRex('${rex.id}', event)" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-sky-50 rounded-lg transition" title="Supprimer le REX"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            ${isTechOrAdmin ? `
+              <button onclick="editRex('${rex.id}', event)" class="p-1 text-slate-400 hover:text-amber-600 hover:bg-sky-50 rounded transition"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+              <button onclick="deleteRex('${rex.id}', event)" class="p-1 text-slate-400 hover:text-red-600 hover:bg-sky-50 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            ` : ''}
           </div>
         </div>
-        <p class="text-xs text-slate-700 leading-relaxed line-clamp-3">${rex.description}</p>
+        <p class="text-xs text-slate-700 leading-relaxed line-clamp-2">${rex.description}</p>
         ${rex.gain ? `<div class="p-2 bg-sky-50 rounded-lg text-xs text-sky-900 border border-sky-200 flex items-center space-x-2"><i data-lucide="trending-up" class="w-3.5 h-3.5 text-sky-600"></i><span><strong>Gain :</strong> ${rex.gain}</span></div>` : ''}
-        ${filesHTML}
-        <div class="pt-1 flex justify-end text-[10px] font-semibold text-sky-600 items-center space-x-1">
-          <span>Ouvrir la fiche complète</span>
-          <i data-lucide="arrow-right" class="w-3 h-3"></i>
-        </div>
+        ${mediaSnippet}
       `;
       return card;
     }
 
-    function openAddRexModal() {
-      editingRexId = null;
-      document.getElementById('rex-modal-title').innerText = "Créer une Amélioration";
-      document.getElementById('rex-btn-submit').innerText = "Publier l'Amélioration";
-      const icon = document.getElementById('rex-modal-icon');
-      if (icon) icon.setAttribute('data-lucide', 'plus-circle');
-
+    function openAddRexModal(rexIdToEdit = null) {
+      editingRexId = rexIdToEdit;
+      const modal = document.getElementById('modal-add-rex');
+      const titleSpan = document.getElementById('rex-modal-title');
+      const submitBtn = document.getElementById('rex-btn-submit');
       const selectRoot = document.getElementById('rex-select-root');
+      
       selectRoot.innerHTML = '';
-
       const roots = state.tree.filter(n => n.parentId === null);
       if (roots.length === 0) {
         showToast("Veuillez d'abord créer au moins une racine.", 'warning');
@@ -2619,20 +1961,57 @@
         selectRoot.innerHTML += `<option value="${r.id}">${r.zoneMk || 'Racine'}</option>`;
       });
 
-      if (state.selectedId) {
-        const selectedNode = state.tree.find(n => n.id === state.selectedId);
-        if (selectedNode) {
-          const rootNode = selectedNode.parentId ? state.tree.find(n => n.id === selectedNode.parentId) : selectedNode;
-          if (rootNode) selectRoot.value = rootNode.id;
+      if (rexIdToEdit) {
+        const rex = state.rexList.find(r => r.id === rexIdToEdit);
+        if (!rex) return;
+
+        titleSpan.innerText = "Modifier l'Amélioration";
+        submitBtn.innerText = "Enregistrer les modifications";
+
+        let currentRoot = null;
+        const targetNode = state.tree.find(n => n.id === rex.nodeId);
+        if (targetNode) {
+          let curr = targetNode;
+          while (curr && curr.parentId !== null) {
+            curr = state.tree.find(n => n.id === curr.parentId);
+          }
+          currentRoot = curr ? curr.id : roots[0].id;
+        } else {
+          currentRoot = roots[0].id;
         }
+
+        selectRoot.value = currentRoot;
+        updateRexSubmachineOptions();
+        document.getElementById('rex-select-sub').value = rex.nodeId;
+
+        document.getElementById('rex-input-title').value = rex.title || '';
+        document.getElementById('rex-input-gain').value = rex.gain || '';
+        document.getElementById('rex-input-desc').value = rex.description || '';
+
+        rexAttachedImages = (rex.images || []).map((img, i) => normalizeRexFile(img, `Fichier_${i+1}`)).filter(Boolean);
+        renderRexFilesPreview();
+      } else {
+        titleSpan.innerText = "Créer une Amélioration";
+        submitBtn.innerText = "Publier l'Amélioration";
+        document.getElementById('form-rex').reset();
+
+        if (state.selectedId) {
+          const selectedNode = state.tree.find(n => n.id === state.selectedId);
+          if (selectedNode) {
+            let curr = selectedNode;
+            while (curr && curr.parentId !== null) {
+              curr = state.tree.find(n => n.id === curr.parentId);
+            }
+            if (curr) selectRoot.value = curr.id;
+          }
+        }
+
+        updateRexSubmachineOptions();
+        rexAttachedImages = [];
+        renderRexFilesPreview();
       }
 
-      updateRexSubmachineOptions();
-
-      document.getElementById('form-rex').reset();
-      rexAttachedImages = [];
-      renderRexFilesPreview();
-      document.getElementById('modal-add-rex').classList.remove('hidden');
+      modal.classList.remove('hidden');
       lucide.createIcons();
     }
 
@@ -2641,14 +2020,11 @@
       document.getElementById('form-rex').reset();
       editingRexId = null;
       rexAttachedImages = [];
-      renderRexFilesPreview();
     }
 
     function updateRexSubmachineOptions() {
       const rootId = document.getElementById('rex-select-root').value;
       const selectSub = document.getElementById('rex-select-sub');
-      selectSub.innerHTML = '';
-
       selectSub.innerHTML = `<option value="${rootId}">(Seulement sur la Racine)</option>`;
 
       function appendChildNodesToSelect(parentId, depth) {
@@ -2676,98 +2052,78 @@
       }
     }
 
-    async function handleRexFilesSelect(e) {
+    function handleRexFilesSelect(e) {
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
 
-      showToast(`Téléversement de ${files.length} pièce(s) jointe(s)...`, 'info');
-
-      for (const f of files) {
-        const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
-        let uploadedUrl = await uploadFileToSupabaseStorage(f, 'rex');
-
-        if (!uploadedUrl) {
-          uploadedUrl = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (evt) => resolve(evt.target.result);
-            reader.readAsDataURL(f);
+      let processed = 0;
+      files.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+          rexAttachedImages.push({
+            name: f.name,
+            size: (f.size / 1024).toFixed(1) + ' Ko',
+            type: isPdf ? 'application/pdf' : (f.type || 'image/jpeg'),
+            dataUrl: evt.target.result
           });
-        }
-
-        rexAttachedImages.push({
-          name: f.name,
-          type: isPdf ? 'application/pdf' : (f.type || 'image/png'),
-          size: (f.size / 1024).toFixed(1) + ' Ko',
-          dataUrl: uploadedUrl
-        });
-      }
-
-      renderRexFilesPreview();
+          processed++;
+          if (processed === files.length) {
+            renderRexFilesPreview();
+          }
+        };
+        reader.readAsDataURL(f);
+      });
       e.target.value = '';
     }
 
     function renderRexFilesPreview() {
       const preview = document.getElementById('rex-files-preview');
-      if (!preview) return;
+      const textNotice = document.getElementById('text-rex-files');
       preview.innerHTML = '';
 
-      rexAttachedImages.forEach((raw, idx) => {
-        const f = normalizeRexFile(raw, `Fichier ${idx + 1}`);
-        if (!f) return;
+      if (rexAttachedImages.length === 0) {
+        textNotice.innerText = "Ajouter des photos/documents...";
+        return;
+      }
+
+      textNotice.innerText = `${rexAttachedImages.length} document(s) joint(s)`;
+
+      rexAttachedImages.forEach((f, idx) => {
         const isPdf = f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf'));
-
         const item = document.createElement('div');
-        item.className = "relative group rounded-lg overflow-hidden border border-sky-200 bg-slate-50 shadow-sm";
+        item.className = "relative group rounded-lg overflow-hidden border border-sky-200 bg-white p-1 text-center shadow-sm";
 
-        if (!isPdf && (f.dataUrl.startsWith('data:image') || f.dataUrl.includes('image'))) {
+        if (isPdf) {
           item.innerHTML = `
-            <img src="${f.dataUrl}" class="h-16 w-full object-cover">
-            <span class="absolute bottom-0 inset-x-0 bg-slate-900/60 text-white text-[8px] px-1 truncate text-center">${f.name}</span>
-            <button type="button" onclick="removeRexImage(${idx})" class="absolute top-1 right-1 p-1 bg-red-600/90 hover:bg-red-600 text-white rounded-full transition shadow opacity-90 hover:opacity-100" title="Supprimer la photo">
-              <i data-lucide="x" class="w-3 h-3"></i>
-            </button>
+            <div class="h-16 flex flex-col items-center justify-center bg-red-50 text-red-600 rounded">
+              <i data-lucide="file-text" class="w-5 h-5"></i>
+              <span class="text-[9px] truncate max-w-full px-1 font-semibold">${f.name}</span>
+            </div>
+            <button type="button" onclick="removeRexFile(${idx})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-0.5 opacity-90 hover:opacity-100"><i data-lucide="x" class="w-3 h-3"></i></button>
           `;
         } else {
           item.innerHTML = `
-            <div class="h-16 p-2 flex flex-col justify-between text-[10px] text-slate-700 bg-red-50/70 border border-red-100">
-              <div class="flex items-center space-x-1 truncate font-medium">
-                <i data-lucide="file-text" class="w-4 h-4 text-red-600 shrink-0"></i>
-                <span class="truncate font-semibold text-slate-800">${f.name}</span>
-              </div>
-              <div class="flex items-center justify-between text-[9px] text-slate-500">
-                <span>PDF (${f.size || 'Doc'})</span>
-                <button type="button" onclick="removeRexImage(${idx})" class="text-red-600 hover:text-red-700 p-0.5">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-            </div>
+            <img src="${f.dataUrl}" class="h-16 w-full object-cover rounded">
+            <button type="button" onclick="removeRexFile(${idx})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-0.5 opacity-90 hover:opacity-100"><i data-lucide="x" class="w-3 h-3"></i></button>
           `;
         }
         preview.appendChild(item);
       });
-
-      const textFiles = document.getElementById('text-rex-files');
-      if (textFiles) {
-        textFiles.innerText = rexAttachedImages.length > 0 
-          ? `${rexAttachedImages.length} fichier(s) attaché(s)` 
-          : "Ajouter des photos/documents...";
-      }
-
       lucide.createIcons();
     }
 
-    function removeRexImage(index) {
+    function removeRexFile(index) {
       rexAttachedImages.splice(index, 1);
       renderRexFilesPreview();
     }
 
-    function saveRexForm(e) {
+    async function saveRexForm(e) {
       e.preventDefault();
       const subId = document.getElementById('rex-select-sub').value;
       const title = document.getElementById('rex-input-title').value;
       const gain = document.getElementById('rex-input-gain').value;
       const desc = document.getElementById('rex-input-desc').value;
-
       const authorName = state.activeUser ? `${state.activeUser.firstname} ${state.activeUser.lastname} (${state.activeUser.role})` : 'Auteur';
 
       if (editingRexId) {
@@ -2777,9 +2133,8 @@
           rex.title = title;
           rex.gain = gain;
           rex.description = desc;
-          rex.images = [...rexAttachedImages];
-          addAuditLog('Modification REX', `Mise à jour complète du REX "${title}"`);
-          showToast("Amélioration modifiée avec succès !", 'success');
+          rex.images = rexAttachedImages;
+          addAuditLog('Modification REX', `Mise à jour de "${title}"`);
         }
       } else {
         const newRex = {
@@ -2790,78 +2145,810 @@
           date: new Date().toLocaleDateString('fr-FR'),
           description: desc,
           gain: gain,
-          images: [...rexAttachedImages]
+          images: rexAttachedImages
         };
-        state.rexList.push(newRex);
-        addAuditLog('Publication REX', `Nouveau REX "${title}" pour machine id ${subId}`);
-        showToast("Amélioration publiée !", 'success');
+        state.rexList.unshift(newRex);
+        addAuditLog('Création REX', `Publication de "${title}"`);
       }
 
-      saveState();
+      await saveState();
       closeAddRexModal();
       renderNodeDetail();
       if (!document.getElementById('view-rex').classList.contains('hidden')) renderAllRex();
+      showToast(editingRexId ? "Amélioration mise à jour !" : "Amélioration publiée avec succès !", 'success');
     }
 
     function editRex(rexId, e) {
       if (e) e.stopPropagation();
-      const rex = state.rexList.find(r => r.id === rexId);
-      if (!rex) return;
-
-      editingRexId = rex.id;
-
-      const targetNode = state.tree.find(n => n.id === rex.nodeId);
-      let rootNode = targetNode;
-      while (rootNode && rootNode.parentId !== null) {
-        rootNode = state.tree.find(n => n.id === rootNode.parentId);
-      }
-
-      const selectRoot = document.getElementById('rex-select-root');
-      selectRoot.innerHTML = '';
-      const roots = state.tree.filter(n => n.parentId === null);
-      roots.forEach(r => {
-        selectRoot.innerHTML += `<option value="${r.id}">${r.zoneMk || 'Racine'}</option>`;
-      });
-
-      if (rootNode) {
-        selectRoot.value = rootNode.id;
-      }
-
-      updateRexSubmachineOptions();
-
-      const selectSub = document.getElementById('rex-select-sub');
-      if (targetNode) {
-        selectSub.value = targetNode.id;
-      }
-
-      document.getElementById('rex-input-title').value = rex.title || '';
-      document.getElementById('rex-input-gain').value = rex.gain || '';
-      document.getElementById('rex-input-desc').value = rex.description || '';
-
-      rexAttachedImages = rex.images ? [...rex.images] : [];
-      renderRexFilesPreview();
-
-      document.getElementById('rex-modal-title').innerText = "Modifier l'Amélioration";
-      document.getElementById('rex-btn-submit').innerText = "Enregistrer les modifications";
-      const icon = document.getElementById('rex-modal-icon');
-      if (icon) icon.setAttribute('data-lucide', 'pencil');
-
-      document.getElementById('modal-add-rex').classList.remove('hidden');
-      lucide.createIcons();
+      openAddRexModal(rexId);
     }
 
     function deleteRex(rexId, e) {
       if (e) e.stopPropagation();
-      const rex = state.rexList.find(r => r.id === rexId);
-      if (!rex) return;
-
-      showConfirmModal("Supprimer l'Amélioration", `Supprimer définitivement "${rex.title}" ?`, () => {
+      showConfirmModal("Supprimer l'Amélioration", "Voulez-vous vraiment supprimer définitivement ce REX ?", async () => {
         state.rexList = state.rexList.filter(r => r.id !== rexId);
-        addAuditLog('Suppression REX', `Suppression du REX "${rex.title}"`);
-        saveState();
+        addAuditLog('Suppression REX', `Suppression du REX id ${rexId}`);
+        await saveState();
         renderNodeDetail();
         if (!document.getElementById('view-rex').classList.contains('hidden')) renderAllRex();
         showToast("Amélioration supprimée.", 'info');
+      });
+    }
+
+    function openAddModal(parentId) {
+      editingNodeId = null;
+      currentParentId = parentId;
+      existingFilesList = [];
+      newUploadFilesList = [];
+      pendingFolderUploadFiles = null;
+
+      const isRacine = parentId === null;
+
+      document.getElementById('modal-title').innerText = isRacine ? "Créer une Racine" : "Créer une Sous-Machine";
+      document.getElementById('form-add-node').reset();
+
+      document.getElementById('field-zone-container').style.display = isRacine ? 'block' : 'none';
+      document.getElementById('field-drive-container').style.display = isRacine ? 'none' : 'block';
+      
+      const previewBox = document.getElementById('folder-import-preview-box');
+      if (previewBox) previewBox.classList.add('hidden');
+
+      renderExistingFilesUI();
+      updateUploadedFilesListUI();
+      document.getElementById('modal-add-node').classList.remove('hidden');
+    }
+
+    function openAddModalForCurrent() {
+      if (!state.selectedId) {
+        showToast("Sélectionnez d'abord un élément parent dans l'arborescence.", 'warning');
+        return;
+      }
+      openAddModal(state.selectedId);
+    }
+
+    function openEditModalCurrent() {
+      if (!state.selectedId) return;
+      const node = state.tree.find(n => n.id === state.selectedId);
+      if (!node) return;
+
+      editingNodeId = node.id;
+      currentParentId = node.parentId;
+      existingFilesList = node.files ? [...node.files] : [];
+      newUploadFilesList = [];
+      pendingFolderUploadFiles = null;
+
+      const isRacine = node.parentId === null;
+
+      document.getElementById('modal-title').innerText = "Modifier l'élément";
+      document.getElementById('field-zone-container').style.display = isRacine ? 'block' : 'none';
+      document.getElementById('field-drive-container').style.display = isRacine ? 'none' : 'block';
+
+      const previewBox = document.getElementById('folder-import-preview-box');
+      if (previewBox) previewBox.classList.add('hidden');
+
+      if (isRacine) {
+        document.getElementById('input-zone').value = node.zoneMk || '';
+      } else {
+        document.getElementById('input-name').value = node.name || '';
+        renderExistingFilesUI();
+        updateUploadedFilesListUI();
+      }
+
+      document.getElementById('modal-add-node').classList.remove('hidden');
+    }
+
+    function closeAddModal() {
+      document.getElementById('modal-add-node').classList.add('hidden');
+      document.getElementById('form-add-node').reset();
+      editingNodeId = null;
+      existingFilesList = [];
+      newUploadFilesList = [];
+      pendingFolderUploadFiles = null;
+      const previewBox = document.getElementById('folder-import-preview-box');
+      if (previewBox) previewBox.classList.add('hidden');
+    }
+
+    function cancelPendingFolderImport() {
+      pendingFolderUploadFiles = null;
+      const previewBox = document.getElementById('folder-import-preview-box');
+      if (previewBox) previewBox.classList.add('hidden');
+      document.getElementById('text-machine-folder').innerText = "Dossier Drive / PC";
+      showToast("Importation du dossier annulée.", "info");
+    }
+
+    function addGoogleDriveLink() {
+      const titleInput = document.getElementById('input-gdrive-title');
+      const urlInput = document.getElementById('input-gdrive-url');
+
+      const title = titleInput.value.trim();
+      const url = urlInput.value.trim();
+
+      if (!url) {
+        showToast("Veuillez saisir une URL Google Drive valide.", 'warning');
+        return;
+      }
+
+      let type = 'googledrive';
+      if (url.includes('docs.google.com/spreadsheets') || url.includes('sheet')) type = 'googlesheet';
+      else if (url.includes('docs.google.com/document') || url.includes('doc')) type = 'googledoc';
+
+      const fileObj = {
+        name: title || (type === 'googlesheet' ? 'Google Sheet' : (type === 'googledoc' ? 'Google Doc' : 'Dossier Google Drive')),
+        size: 'Lien Google Cloud',
+        type: type,
+        dataUrl: url
+      };
+
+      newUploadFilesList.push(fileObj);
+      titleInput.value = '';
+      urlInput.value = '';
+      updateUploadedFilesListUI();
+      showToast("Lien Google Drive ajouté.", 'success');
+    }
+
+    function isIgnoredSystemFile(file) {
+      if (!file) return true;
+      const name = (typeof file === 'string' ? file : file.name || '').toLowerCase().trim();
+      if (!name) return true;
+      if (name.startsWith('.') || name.startsWith('~$')) return true;
+      if (name === 'desktop.ini' || name === 'thumbs.db' || name === '.ds_store' || name === 'ehthumbs.db') return true;
+      return false;
+    }
+
+    function handleMachineFilesUpload(e) {
+      const files = Array.from(e.target.files).filter(f => !isIgnoredSystemFile(f));
+      if (files.length === 0) return;
+
+      let pending = files.length;
+      files.forEach(f => {
+        const isGoogleDriveShortcut = f.name.endsWith('.gdoc') || f.name.endsWith('.gsheet') || f.name.endsWith('.gslides') || f.name.endsWith('.url');
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          let fileType = f.type || (f.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
+          let fileDataUrl = evt.target.result;
+
+          if (isGoogleDriveShortcut) {
+            try {
+              const textContent = evt.target.result;
+              const match = textContent.match(/https?:\/\/[^\s"']+/);
+              if (match) {
+                fileDataUrl = match[0];
+                fileType = f.name.endsWith('.gsheet') ? 'googlesheet' : (f.name.endsWith('.gdoc') ? 'googledoc' : 'googledrive');
+              }
+            } catch(err) {}
+          }
+
+          newUploadFilesList.push({
+            name: f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, ''),
+            size: (f.size / 1024).toFixed(1) + ' Ko',
+            type: fileType,
+            dataUrl: fileDataUrl
+          });
+
+          pending--;
+          if (pending === 0) updateUploadedFilesListUI();
+        };
+
+        if (isGoogleDriveShortcut) reader.readAsText(f);
+        else reader.readAsDataURL(f);
+      });
+
+      e.target.value = '';
+    }
+
+    function removeExistingFile(index) {
+      existingFilesList.splice(index, 1);
+      renderExistingFilesUI();
+    }
+
+    function removeNewFile(index) {
+      newUploadFilesList.splice(index, 1);
+      updateUploadedFilesListUI();
+    }
+
+    function renderExistingFilesUI() {
+      const wrapper = document.getElementById('existing-files-wrapper');
+      const container = document.getElementById('existing-files-list');
+      if (!wrapper || !container) return;
+
+      if (!existingFilesList || existingFilesList.length === 0) {
+        wrapper.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+      }
+
+      wrapper.classList.remove('hidden');
+      container.innerHTML = existingFilesList.map((f, idx) => `
+        <div class="flex items-center justify-between p-2 bg-slate-50 rounded border border-sky-200 text-xs">
+          <div class="truncate flex items-center space-x-2">
+            <i data-lucide="${f.type && f.type.includes('drive') ? 'folder-git-2' : (f.type && f.type.includes('sheet') ? 'table' : (f.type === 'application/pdf' ? 'file-text' : 'file-check'))}" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            <span class="truncate text-slate-800 font-medium">${f.name}</span>
+            <span class="text-[10px] text-slate-400">(${f.size || ''})</span>
+          </div>
+          <button type="button" onclick="removeExistingFile(${idx})" class="p-1 hover:bg-slate-200 rounded text-red-600 transition" title="Supprimer ce fichier">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function updateUploadedFilesListUI() {
+      const listContainer = document.getElementById('uploaded-files-list');
+      const textMachineFiles = document.getElementById('text-machine-files');
+      if (!listContainer) return;
+
+      if (newUploadFilesList.length === 0) {
+        listContainer.innerHTML = '';
+        if (textMachineFiles) textMachineFiles.innerText = "Fichiers / PDF";
+        return;
+      }
+
+      listContainer.innerHTML = newUploadFilesList.map((f, idx) => `
+        <div class="flex items-center justify-between p-2 bg-sky-50 rounded border border-sky-200 text-xs">
+          <div class="truncate flex items-center space-x-2">
+            <i data-lucide="${f.type && f.type.includes('drive') ? 'folder-plus' : (f.type && f.type.includes('sheet') ? 'table' : (f.type === 'application/pdf' ? 'file-text' : 'file-plus'))}" class="w-4 h-4 text-sky-600 shrink-0"></i>
+            <span class="truncate text-sky-900 font-medium">${f.name}</span>
+            <span class="text-[10px] text-slate-400">(${f.size || ''})</span>
+          </div>
+          <button type="button" onclick="removeNewFile(${idx})" class="p-1 hover:bg-sky-100 rounded text-red-600 transition" title="Retirer">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      `).join('');
+
+      if (textMachineFiles) textMachineFiles.innerText = `${newUploadFilesList.length} fichier(s) prêt(s)`;
+      lucide.createIcons();
+    }
+
+    function handleMachineFolderUpload(e) {
+      const files = Array.from(e.target.files).filter(f => !isIgnoredSystemFile(f));
+      if (files.length === 0) {
+        showToast("Aucun fichier valide dans ce dossier.", "warning");
+        return;
+      }
+
+      pendingFolderUploadFiles = files;
+      const firstRelPath = files[0].webkitRelativePath || '';
+      const rootFolderName = firstRelPath ? firstRelPath.split('/')[0] : 'Dossier Drive';
+
+      const inputName = document.getElementById('input-name');
+      if (inputName && !inputName.value.trim()) {
+        inputName.value = rootFolderName;
+      }
+
+      const folderSet = new Set();
+      let pdfCount = 0;
+      files.forEach(f => {
+        const rel = f.webkitRelativePath || '';
+        const parts = rel.split('/');
+        if (parts.length > 2) {
+          folderSet.add(parts.slice(1, -1).join('/'));
+        }
+        if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
+          pdfCount++;
+        }
+      });
+
+      const previewBox = document.getElementById('folder-import-preview-box');
+      const statsBox = document.getElementById('folder-preview-stats');
+      const textMachineFolder = document.getElementById('text-machine-folder');
+
+      if (statsBox) {
+        statsBox.innerHTML = `
+          <div>Dossier racine : <strong>${rootFolderName}</strong></div>
+          <div class="text-[11px] text-sky-800">
+            • <strong>${files.length}</strong> fichier(s) détecté(s) (${pdfCount} PDF)
+            ${folderSet.size > 0 ? `<br>• <strong>${folderSet.size}</strong> sous-dossier(s) hiérarchique(s)` : ''}
+          </div>
+        `;
+      }
+
+      if (previewBox) previewBox.classList.remove('hidden');
+      if (textMachineFolder) textMachineFolder.innerText = `${files.length} fichier(s) prêt(s)`;
+      lucide.createIcons();
+      showToast(`Dossier "${rootFolderName}" prêt à être importé (${files.length} fichiers).`, 'info');
+      e.target.value = '';
+    }
+
+    function cancelOngoingImport() {
+      isImportCancelled = true;
+      const modalProgress = document.getElementById('modal-upload-progress');
+      if (modalProgress) modalProgress.classList.add('hidden');
+
+      if (currentImportCreatedNodeIds && currentImportCreatedNodeIds.length > 0) {
+        state.tree = state.tree.filter(n => !currentImportCreatedNodeIds.includes(n.id));
+        state.selectedId = state.tree.length > 0 ? state.tree[0].id : null;
+        currentImportCreatedNodeIds = [];
+      }
+
+      renderTree();
+      renderNodeDetail();
+      showToast("Importation interrompue et annulée avec succès.", "warning");
+    }
+
+    async function processFilesBatch(rawFiles, customName) {
+      const modalProgress = document.getElementById('modal-upload-progress');
+      const progressTitle = document.getElementById('upload-progress-title');
+      const progressDetail = document.getElementById('upload-progress-detail');
+      const progressBar = document.getElementById('upload-progress-bar');
+      const progressPercent = document.getElementById('upload-progress-percent');
+      const progressCount = document.getElementById('upload-progress-count');
+
+      try {
+        const validFiles = (rawFiles || []).filter(f => !isIgnoredSystemFile(f));
+        if (validFiles.length === 0) return;
+
+        const targetParent = editingNodeId ? editingNodeId : (currentParentId || state.selectedId);
+        const firstRelPath = validFiles[0].webkitRelativePath || '';
+        const rootFolderName = customName || (firstRelPath ? firstRelPath.split('/')[0] : 'Dossier');
+
+        let targetNode = null;
+        if (editingNodeId) {
+          targetNode = state.tree.find(n => n.id === editingNodeId);
+          if (targetNode && customName) targetNode.name = customName;
+        } else {
+          targetNode = {
+            id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            parentId: targetParent,
+            expanded: true,
+            zoneMk: '',
+            name: rootFolderName,
+            files: []
+          };
+          state.tree.push(targetNode);
+          currentImportCreatedNodeIds = [targetNode.id];
+        }
+
+        isImportCancelled = false;
+        if (modalProgress) {
+          progressTitle.innerText = `Téléversement dans "${targetNode.name}"...`;
+          progressDetail.innerText = "Démarrage des fichiers...";
+          progressBar.style.width = "5%";
+          progressPercent.innerText = "5%";
+          progressCount.innerText = `0 / ${validFiles.length}`;
+          modalProgress.classList.remove('hidden');
+        }
+
+        let completed = 0;
+        for (const f of validFiles) {
+          if (isImportCancelled) break;
+
+          let publicUrl = await uploadFileToSupabaseStorage(f, 'machines');
+          if (!publicUrl && f.size < 600 * 1024) {
+            publicUrl = await new Promise(res => {
+              const reader = new FileReader();
+              reader.onload = ev => res(ev.target.result);
+              reader.onerror = () => res(null);
+              reader.readAsDataURL(f);
+            });
+          }
+
+          if (publicUrl) {
+            const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+            targetNode.files.push({
+              name: f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, ''),
+              size: (f.size / 1024).toFixed(1) + ' Ko',
+              type: isPdf ? 'application/pdf' : (f.type || 'application/octet-stream'),
+              dataUrl: publicUrl
+            });
+          }
+
+          completed++;
+          const pct = Math.min(95, Math.round((completed / validFiles.length) * 100));
+          if (progressBar) progressBar.style.width = `${pct}%`;
+          if (progressPercent) progressPercent.innerText = `${pct}%`;
+          if (progressCount) progressCount.innerText = `${completed} / ${validFiles.length}`;
+          if (progressDetail) progressDetail.innerText = f.name;
+        }
+
+        if (!isImportCancelled) {
+          state.selectedId = targetNode.id;
+          await saveState();
+          renderTree();
+          renderNodeDetail();
+          showToast(`${completed} fichier(s) intégré(s) avec succès.`, 'success');
+        }
+      } catch (err) {
+        console.error("Erreur processFilesBatch:", err);
+        showToast("Erreur lors de l'import : " + err.message, "error");
+      } finally {
+        if (modalProgress) modalProgress.classList.add('hidden');
+      }
+    }
+
+    async function saveNode(e) {
+      e.preventDefault();
+
+      const isRacine = currentParentId === null;
+
+      if (pendingFolderUploadFiles && pendingFolderUploadFiles.length > 0) {
+        const mode = document.querySelector('input[name="folder-import-mode"]:checked')?.value || 'hierarchy';
+        const targetParent = editingNodeId ? editingNodeId : (currentParentId || state.selectedId);
+        const nameInput = document.getElementById('input-name');
+        const customName = nameInput ? nameInput.value.trim() : '';
+        const folderFiles = pendingFolderUploadFiles;
+        pendingFolderUploadFiles = null;
+
+        closeAddModal();
+
+        if (mode === 'hierarchy') {
+          await importFolderWithHierarchy(folderFiles, targetParent, customName);
+        } else {
+          await processFilesBatch(folderFiles, customName);
+          await saveState();
+          renderTree();
+          renderNodeDetail();
+        }
+        return;
+      }
+
+      const finalFilesList = [...existingFilesList, ...newUploadFilesList];
+
+      if (editingNodeId) {
+        const node = state.tree.find(n => n.id === editingNodeId);
+        if (node) {
+          if (isRacine) {
+            node.zoneMk = document.getElementById('input-zone').value;
+          } else {
+            node.name = document.getElementById('input-name').value;
+            node.files = finalFilesList;
+          }
+          addAuditLog('Modification Machine', `Mise à jour de "${isRacine ? node.zoneMk : node.name}"`);
+        }
+      } else {
+        const newNode = {
+          id: 'node_' + Date.now(),
+          parentId: currentParentId,
+          expanded: true,
+          zoneMk: isRacine ? document.getElementById('input-zone').value : '',
+          name: isRacine ? '' : document.getElementById('input-name').value,
+          files: isRacine ? [] : finalFilesList
+        };
+
+        state.tree.push(newNode);
+
+        if (currentParentId) {
+          const parent = state.tree.find(n => n.id === currentParentId);
+          if (parent) parent.expanded = true;
+        }
+
+        state.selectedId = newNode.id;
+        addAuditLog('Création Machine', `Création de "${isRacine ? newNode.zoneMk : newNode.name}"`);
+      }
+
+      showToast("Enregistrement en cours...", 'info');
+      await saveState();
+
+      closeAddModal();
+      renderTree();
+      renderNodeDetail();
+    }
+
+    async function importFolderWithHierarchy(rawFiles, targetParentId, customRootName = '') {
+      if (!rawFiles || rawFiles.length === 0) return;
+
+      const modalProgress = document.getElementById('modal-upload-progress');
+      const progressTitle = document.getElementById('upload-progress-title');
+      const progressDetail = document.getElementById('upload-progress-detail');
+      const progressBar = document.getElementById('upload-progress-bar');
+      const progressPercent = document.getElementById('upload-progress-percent');
+      const progressCount = document.getElementById('upload-progress-count');
+
+      try {
+        const validFiles = rawFiles.filter(f => !isIgnoredSystemFile(f));
+        if (validFiles.length === 0) {
+          showToast("Aucun fichier valide à importer.", "warning");
+          return;
+        }
+
+        isImportCancelled = false;
+        const firstRelPath = validFiles[0].webkitRelativePath || '';
+        const rootFolderName = customRootName || (firstRelPath ? firstRelPath.split('/')[0] : 'Dossier Drive');
+
+        if (modalProgress) {
+          progressTitle.innerText = `Importation de "${rootFolderName}"...`;
+          progressDetail.innerText = "Construction de l'arborescence...";
+          progressBar.style.width = "5%";
+          progressPercent.innerText = "5%";
+          progressCount.innerText = `Analyse de ${validFiles.length} fichier(s)...`;
+          modalProgress.classList.remove('hidden');
+        }
+
+        const createdNodeIds = [];
+        currentImportCreatedNodeIds = createdNodeIds;
+
+        const rootNode = {
+          id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+          parentId: targetParentId,
+          expanded: true,
+          zoneMk: '',
+          name: rootFolderName,
+          files: []
+        };
+        state.tree.push(rootNode);
+        createdNodeIds.push(rootNode.id);
+
+        const targetParent = state.tree.find(n => n.id === targetParentId);
+        if (targetParent) targetParent.expanded = true;
+
+        const folderMap = new Map();
+        folderMap.set('', rootNode);
+        let createdFoldersCount = 1;
+        const fileTasks = [];
+
+        for (const f of validFiles) {
+          const relPath = f.webkitRelativePath || '';
+          const parts = relPath.split('/');
+          const dirSegments = parts.slice(1, -1);
+
+          let currentNode = rootNode;
+          let pathKey = '';
+
+          for (const segment of dirSegments) {
+            pathKey = pathKey ? `${pathKey}/${segment}` : segment;
+
+            if (!folderMap.has(pathKey)) {
+              const newNode = {
+                id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 7) + '_' + createdFoldersCount,
+                parentId: currentNode.id,
+                expanded: true,
+                zoneMk: '',
+                name: segment,
+                files: []
+              };
+              state.tree.push(newNode);
+              createdNodeIds.push(newNode.id);
+              folderMap.set(pathKey, newNode);
+              createdFoldersCount++;
+            }
+            currentNode = folderMap.get(pathKey);
+          }
+
+          fileTasks.push({ file: f, targetNode: currentNode });
+        }
+
+        const total = fileTasks.length;
+        let completed = 0;
+        let failedFilesCount = 0;
+        const CONCURRENCY = 2;
+        let taskIndex = 0;
+
+        async function worker() {
+          while (taskIndex < total) {
+            if (isImportCancelled) break;
+
+            const currentIndex = taskIndex++;
+            const task = fileTasks[currentIndex];
+            const f = task.file;
+            const targetNode = task.targetNode;
+
+            let publicUrl = await uploadFileToSupabaseStorage(f, 'machines');
+
+            if (!publicUrl) {
+              if (f.size < 600 * 1024) {
+                publicUrl = await new Promise(resolve => {
+                  const reader = new FileReader();
+                  reader.onload = ev => resolve(ev.target.result);
+                  reader.onerror = () => resolve(null);
+                  reader.readAsDataURL(f);
+                });
+              } else {
+                failedFilesCount++;
+                console.warn(`Fichier ${f.name} trop lourd (${(f.size/1024).toFixed(0)} Ko) pour être mis en cache mémoire sans Storage.`);
+              }
+            }
+
+            if (isImportCancelled) break;
+
+            if (publicUrl) {
+              const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+              const fileType = isPdf ? 'application/pdf' : (f.type || 'application/octet-stream');
+
+              targetNode.files.push({
+                name: f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, ''),
+                size: (f.size / 1024).toFixed(1) + ' Ko',
+                type: fileType,
+                dataUrl: publicUrl
+              });
+            }
+
+            completed++;
+            const pct = Math.min(90, Math.round((completed / total) * 90));
+            if (progressBar) progressBar.style.width = `${pct}%`;
+            if (progressPercent) progressPercent.innerText = `${pct}%`;
+            if (progressCount) progressCount.innerText = `${completed} / ${total} fichier(s)`;
+            if (progressDetail) progressDetail.innerText = `[${targetNode.name}] ${f.name}`;
+          }
+        }
+
+        const workers = [];
+        for (let i = 0; i < Math.min(CONCURRENCY, total); i++) {
+          workers.push(worker());
+        }
+        await Promise.all(workers);
+
+        if (isImportCancelled) {
+          return;
+        }
+
+        if (progressDetail) progressDetail.innerText = "Synchronisation Cloud...";
+        if (progressBar) progressBar.style.width = "95%";
+        if (progressPercent) progressPercent.innerText = "95%";
+
+        state.selectedId = rootNode.id;
+        lastImportedRootNodeIds = createdNodeIds;
+
+        addAuditLog('Import Dossier Arborescence', `"${rootFolderName}" : ${createdFoldersCount} dossier(s), ${completed - failedFilesCount} fichier(s).`);
+        await saveState();
+
+        if (progressBar) progressBar.style.width = "100%";
+        if (progressPercent) progressPercent.innerText = "100%";
+
+        renderTree();
+        renderNodeDetail();
+
+        const notice = failedFilesCount > 0 ? ` (${failedFilesCount} fichier(s) volumineux non-téléversés)` : '';
+        showUndoToast(`Dossier "${rootFolderName}" importé (${createdFoldersCount} dossiers, ${completed - failedFilesCount} fichiers)${notice}.`, () => undoLastImport(createdNodeIds, rootFolderName));
+      } catch (err) {
+        console.error("Erreur durant importFolderWithHierarchy:", err);
+        showToast("Erreur lors de l'importation : " + err.message, "error");
+      } finally {
+        setTimeout(() => {
+          if (modalProgress) modalProgress.classList.add('hidden');
+        }, 350);
+      }
+    }
+
+    function showUndoToast(message, onUndo) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = "bg-slate-900 text-white pointer-events-auto px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center justify-between space-x-3 transition-all transform duration-300 border border-sky-400";
+      toast.innerHTML = `
+        <div class="flex items-center space-x-2">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+          <span class="font-medium">${message}</span>
+        </div>
+        <button id="btn-undo-action" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg text-xs font-bold shrink-0 transition flex items-center space-x-1 shadow-sm">
+          <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+          <span>Annuler l'import</span>
+        </button>
+      `;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      const undoBtn = toast.querySelector('#btn-undo-action');
+      let undone = false;
+      undoBtn.onclick = () => {
+        undone = true;
+        toast.remove();
+        if (onUndo) onUndo();
+      };
+
+      setTimeout(() => {
+        if (!undone && toast.parentNode) {
+          toast.classList.add('opacity-0', 'translate-y-2');
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, 15000);
+    }
+
+    async function undoLastImport(nodeIds, folderName) {
+      if (!nodeIds || nodeIds.length === 0) return;
+      showConfirmModal("Annuler l'importation", `Voulez-vous supprimer l'intégralité du dossier importé "${folderName}" et ses sous-machines ?`, async () => {
+        state.tree = state.tree.filter(n => !nodeIds.includes(n.id));
+        state.rexList = state.rexList.filter(r => !nodeIds.includes(r.nodeId));
+        state.selectedId = state.tree.length > 0 ? state.tree[0].id : null;
+        
+        addAuditLog('Annulation Import', `Suppression de l'import "${folderName}"`);
+        await saveState();
+        renderTree();
+        renderNodeDetail();
+        showToast(`L'importation de "${folderName}" a été annulée.`, 'info');
+      });
+    }
+
+    function copyCurrentNode() {
+      if (!state.selectedId) return;
+      const nodeToCopy = state.tree.find(n => n.id === state.selectedId);
+      if (!nodeToCopy || nodeToCopy.parentId === null) {
+        showToast("Sélectionnez une sous-machine à copier.", 'warning');
+        return;
+      }
+
+      copiedNodeBuffer = JSON.parse(JSON.stringify(nodeToCopy));
+      
+      const badge = document.getElementById('copied-badge');
+      const badgeText = document.getElementById('copied-badge-text');
+      badgeText.innerText = `Copié : "${copiedNodeBuffer.name}" (Prêt à coller)`;
+      badge.classList.remove('hidden');
+
+      renderNodeDetail();
+      showToast(`Sous-machine "${copiedNodeBuffer.name}" copiée !`, 'info');
+    }
+
+    async function pasteCopiedNode() {
+      if (!copiedNodeBuffer) {
+        showToast("Aucune sous-machine en mémoire.", 'warning');
+        return;
+      }
+      if (!state.selectedId) {
+        showToast("Sélectionnez la machine ou zone cible dans laquelle coller.", 'warning');
+        return;
+      }
+
+      const targetParent = state.tree.find(n => n.id === state.selectedId);
+      if (!targetParent) return;
+
+      function duplicateNodeRecursive(sourceNode, targetParentId) {
+        const newId = 'node_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        const newNode = {
+          ...JSON.parse(JSON.stringify(sourceNode)),
+          id: newId,
+          parentId: targetParentId,
+          name: sourceNode.name ? (targetParentId === sourceNode.parentId ? sourceNode.name + ' (Copie)' : sourceNode.name) : 'Sous-machine'
+        };
+
+        state.tree.push(newNode);
+
+        const originalRexs = state.rexList.filter(r => r.nodeId === sourceNode.id);
+        originalRexs.forEach(rex => {
+          state.rexList.push({
+            ...JSON.parse(JSON.stringify(rex)),
+            id: 'rex_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now(),
+            nodeId: newId
+          });
+        });
+
+        const children = state.tree.filter(n => n.parentId === sourceNode.id);
+        children.forEach(child => duplicateNodeRecursive(child, newId));
+
+        return newId;
+      }
+
+      const createdId = duplicateNodeRecursive(copiedNodeBuffer, targetParent.id);
+
+      targetParent.expanded = true;
+      state.selectedId = createdId;
+
+      addAuditLog('Duplication Machine', `Duplication de "${copiedNodeBuffer.name}" vers "${targetParent.zoneMk || targetParent.name}"`);
+      await saveState();
+      renderTree();
+      renderNodeDetail();
+      showToast("Sous-machine dupliquée et collée avec succès !", 'success');
+    }
+
+    function deleteCurrentNode() {
+      if (!state.selectedId) return;
+      const nodeToDelete = state.tree.find(n => n.id === state.selectedId);
+      if (!nodeToDelete) return;
+
+      const name = nodeToDelete.parentId === null ? nodeToDelete.zoneMk : nodeToDelete.name;
+
+      showConfirmModal("Supprimer l'élément", `Supprimer "${name}" et toutes ses sous-machines ?`, async () => {
+        const idsToDelete = [nodeToDelete.id];
+        function collectChildren(parentId) {
+          const children = state.tree.filter(n => n.parentId === parentId);
+          children.forEach(c => {
+            idsToDelete.push(c.id);
+            collectChildren(c.id);
+          });
+        }
+        collectChildren(nodeToDelete.id);
+
+        state.tree = state.tree.filter(n => !idsToDelete.includes(n.id));
+        state.rexList = state.rexList.filter(r => !idsToDelete.includes(r.nodeId));
+        state.selectedId = state.tree.length > 0 ? state.tree[0].id : null;
+
+        addAuditLog('Suppression Machine', `Suppression de "${name}" et ses enfants`);
+        await saveState();
+        renderTree();
+        renderNodeDetail();
+        showToast("Élément supprimé.", 'info');
       });
     }
 
@@ -2967,7 +3054,7 @@
           <div class="text-center space-y-3 p-6">
             <i data-lucide="layout" class="w-16 h-16 text-slate-400 mx-auto"></i>
             <p class="text-slate-600 text-sm">Zone d'affichage de votre schéma Draw.io.</p>
-            <button onclick="promptDrawioUrl()" class="text-xs text-sky-600 hover:underline font-medium">Lier votre schéma Draw.io</button>
+            <button onclick="handleAuthAction(() => promptDrawioUrl(), 'Administrateur')" class="text-xs text-sky-600 hover:underline font-medium">Lier votre schéma Draw.io</button>
           </div>
         `;
         lucide.createIcons();
@@ -3007,7 +3094,7 @@
       state.users.push(newUser);
       addAuditLog('Création Compte', `Création compte ${firstname} ${lastname} (${role})`);
 
-      saveState();
+      await saveState();
       closeCreateUserModal();
       renderUsersList();
       showToast(`Compte créé pour ${firstname} ${lastname}`, 'success');
@@ -3043,10 +3130,10 @@
       const target = state.users.find(u => u.id === userId);
       if (!target) return;
 
-      showConfirmModal("Supprimer l'utilisateur", `Supprimer le compte de "${target.firstname} ${target.lastname}" ?`, () => {
+      showConfirmModal("Supprimer l'utilisateur", `Supprimer le compte de "${target.firstname} ${target.lastname}" ?`, async () => {
         state.users = state.users.filter(u => u.id !== userId);
         addAuditLog('Suppression Compte', `Suppression compte ${target.firstname} ${target.lastname}`);
-        saveState();
+        await saveState();
         renderUsersList();
         showToast("Utilisateur supprimé.", 'info');
       });
@@ -3083,7 +3170,7 @@
         } catch(err) {}
 
         addAuditLog('Connexion', `Connexion de ${user.firstname} ${user.lastname} (${user.role})`);
-        saveState();
+        await saveState();
         applyUserPermissions();
         renderNodeDetail();
         closeLoginModal();
@@ -3142,7 +3229,7 @@
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(event) {
+      reader.onload = async function(event) {
         try {
           const importedData = JSON.parse(event.target.result);
           if (importedData && importedData.tree) {
@@ -3156,7 +3243,7 @@
             state.selectedId = state.tree.length > 0 ? state.tree[0].id : null;
 
             addAuditLog('Import Sauvegarde', 'Restauration réussie depuis fichier JSON');
-            saveState();
+            await saveState();
             applyUserPermissions();
             renderTree();
             renderNodeDetail();
