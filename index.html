@@ -1911,19 +1911,31 @@
       }
 
       copiedNodeBuffer = JSON.parse(JSON.stringify(nodeToCopy));
+
+      let totalNodes = 1;
+      let totalFiles = (copiedNodeBuffer.files || []).length;
+      function countTreeStats(node) {
+        const children = state.tree.filter(n => n.parentId === node.id);
+        totalNodes += children.length;
+        children.forEach(c => {
+          totalFiles += (c.files || []).length;
+          countTreeStats(c);
+        });
+      }
+      countTreeStats(nodeToCopy);
       
       const badge = document.getElementById('copied-badge');
       const badgeText = document.getElementById('copied-badge-text');
-      badgeText.innerText = `Copié : "${copiedNodeBuffer.name}" (Prêt à coller)`;
+      badgeText.innerText = `Copié : "${copiedNodeBuffer.name}" (${totalNodes} élément(s), ${totalFiles} fichier(s)) — Prêt à coller (Ctrl+V)`;
       badge.classList.remove('hidden');
 
       renderNodeDetail();
-      showToast(`Sous-machine "${copiedNodeBuffer.name}" copiée en mémoire !`, 'success');
+      showToast(`"${copiedNodeBuffer.name}" copié (${totalFiles} fichier(s)). Prêt à coller (Ctrl+V ou bouton).`, 'success');
     }
 
-    function pasteCopiedNode() {
+    async function pasteCopiedNode() {
       if (!copiedNodeBuffer) {
-        showToast("Aucune sous-machine en mémoire.", 'warning');
+        showToast("Aucune sous-machine en mémoire à coller.", 'warning');
         return;
       }
       if (!state.selectedId) {
@@ -1933,6 +1945,24 @@
 
       const targetParent = state.tree.find(n => n.id === state.selectedId);
       if (!targetParent) return;
+
+      // Afficher l'overlay de progression identique à l'injection
+      const modalProgress = document.getElementById('modal-upload-progress');
+      const progressTitle = document.getElementById('upload-progress-title');
+      const progressDetail = document.getElementById('upload-progress-detail');
+      const progressBar = document.getElementById('upload-progress-bar');
+      const progressPercent = document.getElementById('upload-progress-percent');
+
+      if (modalProgress) {
+        progressTitle.innerText = "Duplication en cours...";
+        progressDetail.innerText = `Duplication de "${copiedNodeBuffer.name}" et de ses fichiers...`;
+        progressBar.style.width = "35%";
+        progressPercent.innerText = "35%";
+        modalProgress.classList.remove('hidden');
+      }
+
+      let clonedCount = 0;
+      let clonedFilesCount = 0;
 
       function duplicateNodeRecursive(sourceNode, targetParentId) {
         const newId = 'node_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
@@ -1944,6 +1974,8 @@
         };
 
         state.tree.push(newNode);
+        clonedCount++;
+        clonedFilesCount += (newNode.files || []).length;
 
         const originalRexs = state.rexList.filter(r => r.nodeId === sourceNode.id);
         originalRexs.forEach(rex => {
@@ -1960,17 +1992,71 @@
         return newId;
       }
 
-      const createdId = duplicateNodeRecursive(copiedNodeBuffer, targetParent.id);
+      try {
+        const createdId = duplicateNodeRecursive(copiedNodeBuffer, targetParent.id);
+        targetParent.expanded = true;
+        state.selectedId = createdId;
 
-      targetParent.expanded = true;
-      state.selectedId = createdId;
+        if (progressBar) {
+          progressBar.style.width = "75%";
+          progressPercent.innerText = "75%";
+          progressDetail.innerText = "Synchronisation et enregistrement sur Supabase Cloud...";
+        }
 
-      addAuditLog('Duplication', `Duplication de "${copiedNodeBuffer.name}" vers sous-machine id ${createdId}`);
-      saveState();
-      renderTree();
-      renderNodeDetail();
-      showToast("Sous-machine dupliquée avec succès !", 'success');
+        addAuditLog('Duplication Machine', `Duplication de "${copiedNodeBuffer.name}" (${clonedCount} élément(s), ${clonedFilesCount} fichier(s))`);
+        
+        // Attente impérative de l'enregistrement Cloud pour éviter les pertes au rafraîchissement
+        await saveState();
+
+        if (progressBar) {
+          progressBar.style.width = "100%";
+          progressPercent.innerText = "100%";
+        }
+
+        renderTree();
+        renderNodeDetail();
+        showToast(`Dossier dupliqué avec succès (${clonedCount} élément(s), ${clonedFilesCount} fichier(s)) !`, 'success');
+      } catch (err) {
+        console.error("Erreur duplication :", err);
+        showToast("Erreur lors de la duplication des dossiers.", 'error');
+      } finally {
+        setTimeout(() => {
+          if (modalProgress) modalProgress.classList.add('hidden');
+        }, 300);
+      }
     }
+
+    document.addEventListener('keydown', (e) => {
+      // Ignorer si l'utilisateur saisit dans un champ de formulaire
+      const activeTag = document.activeElement ? document.activeElement.tagName : '';
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) return;
+
+      const isModifier = e.ctrlKey || e.metaKey;
+      if (isModifier && e.key.toLowerCase() === 'c') {
+        const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
+        if (isTechOrAdmin && state.selectedId) {
+          e.preventDefault();
+          copyCurrentNode();
+        }
+      } else if (isModifier && e.key.toLowerCase() === 'v') {
+        const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
+        if (isTechOrAdmin && copiedNodeBuffer && state.selectedId) {
+          e.preventDefault();
+          pasteCopiedNode();
+        }
+      }
+    });
+
+    // Permet de coller des fichiers copiés sur l'ordinateur directement dans la modale machine (Ctrl+V)
+    document.addEventListener('paste', (e) => {
+      const modalAddNode = document.getElementById('modal-add-node');
+      if (modalAddNode && !modalAddNode.classList.contains('hidden')) {
+        if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+          e.preventDefault();
+          processFilesBatch(Array.from(e.clipboardData.files));
+        }
+      }
+    });
 
     function addGoogleDriveLink() {
       const titleInput = document.getElementById('input-gdrive-title');
