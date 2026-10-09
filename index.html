@@ -12,17 +12,57 @@
   <!-- SDK SUPABASE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- STYLES PERSONNALISÉS THÈME BLANC ET BLEU CLAIR -->
+  <!-- THÈMES DYNAMIQUES ET STYLES PERSONNALISÉS -->
   <style>
-    body { 
+    /* THÈME CLAIR (PAR DÉFAUT) */
+    html.light body { 
       background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%); 
       color: #0f172a; 
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
     }
+    html.light .theme-card { background-color: rgba(255, 255, 255, 0.9); border-color: #bae6fd; }
+    html.light .theme-header { background-color: rgba(255, 255, 255, 0.95); border-color: #bae6fd; }
+    html.light .theme-sidebar { background-color: rgba(255, 255, 255, 0.85); border-color: #bae6fd; }
+    html.light .theme-node-hover:hover { background-color: #f0f9ff; }
+    html.light .theme-accent-btn { background-color: #0284c7; color: white; }
+    html.light .theme-accent-btn:hover { background-color: #0369a1; }
+
+    /* THÈME SOMBRE (DARK MODE) */
+    html.dark body { 
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e293b 100%); 
+      color: #f1f5f9; 
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+    }
+    html.dark .theme-card { background-color: #1e293b; border-color: #334155; color: #f8fafc; }
+    html.dark .theme-header { background-color: #0f172a; border-color: #334155; color: #f8fafc; }
+    html.dark .theme-sidebar { background-color: #111827; border-color: #334155; color: #f8fafc; }
+    html.dark .theme-node-hover:hover { background-color: #334155; }
+    html.dark .theme-accent-btn { background-color: #0ea5e9; color: #0f172a; }
+    html.dark .theme-accent-btn:hover { background-color: #38bdf8; }
+    html.dark input, html.dark select, html.dark textarea { 
+      background-color: #0f172a !important; 
+      color: #f1f5f9 !important; 
+      border-color: #334155 !important; 
+    }
+
+    /* THÈME COLORÉ (VIBRANT MODE) */
+    html.vibrant body { 
+      background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 35%, #e0e7ff 70%, #dbeafe 100%); 
+      color: #1e1b4b; 
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+    }
+    html.vibrant .theme-card { background-color: rgba(255, 255, 255, 0.95); border-color: #e9d5ff; }
+    html.vibrant .theme-header { background-color: rgba(255, 255, 255, 0.95); border-color: #d8b4fe; }
+    html.vibrant .theme-sidebar { background-color: rgba(250, 245, 255, 0.9); border-color: #e9d5ff; }
+    html.vibrant .theme-node-hover:hover { background-color: #f3e8ff; }
+    html.vibrant .theme-accent-btn { background-color: #7c3aed; color: white; }
+    html.vibrant .theme-accent-btn:hover { background-color: #6d28d9; }
     
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #e2e8f0; }
+    ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 3px; }
+    html.dark ::-webkit-scrollbar-thumb { background: #475569; }
+    html.vibrant ::-webkit-scrollbar-thumb { background: #c084fc; }
 
     @media print {
       body * { visibility: hidden; }
@@ -32,16 +72,16 @@
     }
   </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden text-slate-800 relative">
+<body class="h-screen flex flex-col overflow-hidden relative">
 
   <!-- BANDEAU SUPÉRIEUR (TOPBAR) -->
-  <header class="h-16 bg-white/90 backdrop-blur-md border-b border-sky-200 flex items-center justify-between px-6 shrink-0 z-20 shadow-sm">
+  <header class="theme-header h-16 border-b flex items-center justify-between px-6 shrink-0 z-20 shadow-sm transition-colors duration-300">
     <div class="flex items-center space-x-3">
       <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold bg-sky-600 shadow-md shadow-sky-200">
         <i data-lucide="wrench" class="w-5 h-5"></i>
       </div>
       <div>
-        <h1 class="font-extrabold text-lg text-slate-900 tracking-tight">Méca MULHOUSE AMBIANT</h1>
+        <h1 class="font-extrabold text-lg tracking-tight">Méca MULHOUSE AMBIANT</h1>
         <p class="text-[10px] text-sky-600 font-semibold">Plateforme Maintenance Multisite</p>
       </div>
     </div>
@@ -53,7 +93,7 @@
     </div>
 
     <!-- NAVIGATION PAR ONGLETS PRINCIPAUX -->
-    <nav class="flex items-center space-x-1 bg-sky-100/80 p-1 rounded-xl border border-sky-200">
+    <nav class="flex items-center space-x-1 bg-sky-100/70 p-1 rounded-xl border border-sky-200">
       <button onclick="switchTab('eldph')" id="nav-eldph" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-sky-600 text-white shadow-sm">
         <i data-lucide="network" class="w-4 h-4"></i>
         <span>Méca ELDPH</span>
@@ -69,30 +109,43 @@
         <span>Toutes les Améliorations</span>
       </button>
 
+      <button onclick="switchTab('travaux')" id="nav-travaux" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-600 hover:text-slate-900 hover:bg-white/60">
+        <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+        <span>Travaux à faire</span>
+      </button>
+
       <button onclick="switchTab('menu')" id="nav-menu" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-600 hover:text-slate-900 hover:bg-white/60">
         <i data-lucide="menu" class="w-4 h-4"></i>
         <span>Menu</span>
       </button>
     </nav>
 
-    <!-- BADGE UTILISATEUR & DECONNEXION -->
-    <div class="flex items-center space-x-3 bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-xl">
-      <div class="flex items-center space-x-2">
-        <div class="w-7 h-7 bg-sky-600/10 text-sky-600 border border-sky-300 rounded-full flex items-center justify-center text-xs font-bold">
-          <i data-lucide="user" class="w-4 h-4"></i>
+    <!-- ACTIONS RAPIDES : COMMUTATEUR DE THÈME & BADGE UTILISATEUR -->
+    <div class="flex items-center space-x-3">
+      <!-- BOUTON RAPIDE COMMUTATEUR DE THÈME -->
+      <button onclick="cycleTheme()" id="btn-theme-quick-toggle" class="p-2 rounded-xl border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-700 transition" title="Changer de thème visuel">
+        <i id="theme-quick-icon" data-lucide="sun" class="w-4 h-4"></i>
+      </button>
+
+      <!-- BADGE UTILISATEUR -->
+      <div class="flex items-center space-x-3 bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-xl">
+        <div class="flex items-center space-x-2">
+          <div class="w-7 h-7 bg-sky-600/10 text-sky-600 border border-sky-300 rounded-full flex items-center justify-center text-xs font-bold">
+            <i data-lucide="user" class="w-4 h-4"></i>
+          </div>
+          <div class="text-left">
+            <div id="topbar-user-fullname" class="text-xs font-bold leading-tight">Invité</div>
+            <div id="topbar-user-role" class="text-[9px] text-sky-600 font-semibold">Consultateur</div>
+          </div>
         </div>
-        <div class="text-left">
-          <div id="topbar-user-fullname" class="text-xs font-bold text-slate-900 leading-tight">Invité</div>
-          <div id="topbar-user-role" class="text-[9px] text-sky-600 font-semibold">Consultateur</div>
+        <div class="flex items-center space-x-1">
+          <button id="btn-login-trigger" onclick="openLoginModal()" class="p-1.5 hover:bg-sky-200/60 rounded-lg text-slate-500 hover:text-sky-700 transition" title="Se connecter">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-logout-trigger" onclick="logoutUser()" class="hidden p-1.5 hover:bg-red-100 rounded-lg text-slate-500 hover:text-red-600 transition" title="Se déconnecter (Revenir en Invité)">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
         </div>
-      </div>
-      <div class="flex items-center space-x-1">
-        <button id="btn-login-trigger" onclick="openLoginModal()" class="p-1.5 hover:bg-sky-200/60 rounded-lg text-slate-500 hover:text-sky-700 transition" title="Se connecter">
-          <i data-lucide="log-in" class="w-4 h-4"></i>
-        </button>
-        <button id="btn-logout-trigger" onclick="logoutUser()" class="hidden p-1.5 hover:bg-red-100 rounded-lg text-slate-500 hover:text-red-600 transition" title="Se déconnecter (Revenir en Invité)">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-        </button>
       </div>
     </div>
   </header>
@@ -102,12 +155,12 @@
       
     <!-- ONGLET 1: MÉCA ELDPH -->
     <div id="view-eldph" class="flex-1 flex overflow-hidden w-full">
-      <aside class="w-80 bg-white/80 backdrop-blur-md border-r border-sky-200 flex flex-col shrink-0">
+      <aside class="theme-sidebar w-80 border-r flex flex-col shrink-0">
         <div class="p-3 border-b border-sky-200 flex flex-col space-y-2">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2">
               <i data-lucide="folder-tree" class="w-4 h-4 text-sky-600"></i>
-              <h2 class="font-semibold text-xs uppercase tracking-wider text-slate-600">Arborescence</h2>
+              <h2 class="font-semibold text-xs uppercase tracking-wider text-slate-500">Arborescence</h2>
             </div>
           </div>
 
@@ -119,7 +172,7 @@
 
           <!-- BOUTONS D'ACTION ARBORESCENCE -->
           <div class="flex flex-col space-y-1.5 pt-1">
-            <button id="sidebar-btn-add-root" onclick="handleAuthAction(() => openAddModal(null), 'Administrateur')" class="w-full flex items-center justify-center space-x-1.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium rounded transition shadow-sm">
+            <button id="sidebar-btn-add-root" onclick="handleAuthAction(() => openAddModal(null), 'Administrateur')" class="theme-accent-btn w-full flex items-center justify-center space-x-1.5 py-1.5 text-xs font-medium rounded transition shadow-sm">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>Créer Racine</span>
             </button>
@@ -139,13 +192,21 @@
       </aside>
 
       <main class="flex-1 flex flex-col overflow-hidden bg-transparent">
-        <div id="node-header" class="p-4 bg-white/70 backdrop-blur-md border-b border-sky-200 flex justify-between items-center">
+        <div id="node-header" class="theme-card p-4 border-b flex justify-between items-center">
           <div class="flex items-center space-x-3">
-            <div class="p-2.5 bg-sky-100 text-sky-600 border border-sky-200 rounded-lg">
+            <!-- BOUTON RETOUR PARENT DYNAMIQUE -->
+            <button id="btn-navigate-back" onclick="navigateUpTree()" class="hidden p-2 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-700 transition" title="Remonter au parent">
+              <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+
+            <div class="p-2.5 bg-sky-100 text-sky-600 border border-sky-200 rounded-lg shrink-0">
               <i data-lucide="cpu" class="w-6 h-6"></i>
             </div>
             <div>
-              <h2 id="detail-title" class="text-xl font-bold text-slate-900">Sélectionnez un élément</h2>
+              <!-- FIL D'ARIANE / BREADCRUMB -->
+              <div id="breadcrumb-container" class="text-[10px] text-sky-600 font-semibold flex items-center space-x-1 mb-0.5 flex-wrap"></div>
+              
+              <h2 id="detail-title" class="text-xl font-bold">Sélectionnez un élément</h2>
               <p id="copied-badge" class="text-[11px] text-amber-600 hidden flex items-center space-x-1 mt-0.5">
                 <i data-lucide="copy" class="w-3 h-3"></i>
                 <span id="copied-badge-text"></span>
@@ -170,6 +231,10 @@
               <i data-lucide="pencil" class="w-3.5 h-3.5 text-amber-600"></i>
               <span>Modifier / Gérer fichiers</span>
             </button>
+            <button id="btn-add-travail-direct" onclick="handleAuthAction(() => openAddTravailModal(), 'Technicien')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-medium transition flex items-center space-x-1.5 shadow-sm">
+              <i data-lucide="clipboard-pen" class="w-3.5 h-3.5"></i>
+              <span>Relever Travail</span>
+            </button>
             <button id="btn-add-rex" onclick="handleAuthAction(() => openAddRexModal(), 'Technicien')" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-medium transition flex items-center space-x-1.5 shadow-sm">
               <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
               <span>Publier Amélioration</span>
@@ -182,8 +247,24 @@
         </div>
 
         <div class="flex-1 flex flex-col overflow-hidden p-4 space-y-4">
-          <div id="drive-preview-container" class="flex-1 bg-white/80 backdrop-blur-md border border-sky-200 rounded-xl overflow-hidden flex flex-col relative shadow-sm"></div>
-          <div class="h-44 border-t border-sky-200 pt-3 overflow-y-auto shrink-0" id="node-rex-container"></div>
+          <div id="drive-preview-container" class="theme-card flex-1 border rounded-xl overflow-hidden flex flex-col relative shadow-sm"></div>
+          
+          <!-- PANNEAU INFÉRIEUR AVEC ONGLETS : AMÉLIORATIONS (REX) & TRAVAUX -->
+          <div class="h-56 border-t border-sky-200 pt-2 flex flex-col shrink-0">
+            <div class="flex items-center space-x-2 border-b border-sky-200/80 pb-1.5 mb-2">
+              <button onclick="switchMachineSubTab('rex')" id="tab-btn-machine-rex" class="px-3 py-1 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-sky-600 text-white shadow-sm">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                <span id="tab-label-machine-rex">Améliorations (0)</span>
+              </button>
+              <button onclick="switchMachineSubTab('travaux')" id="tab-btn-machine-travaux" class="px-3 py-1 rounded-md text-xs font-bold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900 hover:bg-white/60">
+                <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i>
+                <span id="tab-label-machine-travaux">Travaux à faire (0)</span>
+              </button>
+            </div>
+
+            <div id="node-rex-container" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+            <div id="node-travaux-container" class="flex-1 overflow-y-auto space-y-2 pr-1 hidden"></div>
+          </div>
         </div>
       </main>
     </div>
@@ -192,8 +273,8 @@
     <div id="view-synoptique" class="flex-1 flex flex-col bg-transparent p-6 overflow-hidden hidden w-full">
       <div class="flex justify-between items-center mb-4">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Synoptique MK</h2>
-          <p class="text-xs text-slate-600">Schéma interactif d'ensemble du site de Mulhouse.</p>
+          <h2 class="text-xl font-bold">Synoptique MK</h2>
+          <p class="text-xs text-slate-500">Schéma interactif d'ensemble du site de Mulhouse.</p>
         </div>
         <button id="btn-edit-synoptique" onclick="handleAuthAction(() => promptDrawioUrl(), 'Administrateur')" class="px-3 py-1.5 bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 rounded-lg text-xs font-medium flex items-center space-x-2">
           <i data-lucide="link" class="w-3.5 h-3.5 text-sky-600"></i>
@@ -201,15 +282,15 @@
         </button>
       </div>
 
-      <div class="flex-1 bg-white/80 backdrop-blur-md border border-sky-200 rounded-xl flex items-center justify-center p-2 relative overflow-hidden shadow-sm" id="synoptique-container"></div>
+      <div class="theme-card flex-1 border rounded-xl flex items-center justify-center p-2 relative overflow-hidden shadow-sm" id="synoptique-container"></div>
     </div>
 
     <!-- ONGLET 3: TOUTES LES AMÉLIORATIONS -->
     <div id="view-rex" class="flex-1 flex flex-col bg-transparent p-6 overflow-hidden hidden w-full">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Bibliothèque Globale des Améliorations</h2>
-          <p class="text-xs text-slate-600">Recherchez par nom de machine, mot-clé, gain ou auteur.</p>
+          <h2 class="text-xl font-bold">Bibliothèque Globale des Améliorations</h2>
+          <p class="text-xs text-slate-500">Recherchez par nom de machine, mot-clé, gain ou auteur.</p>
         </div>
         <div class="flex space-x-2">
           <input type="text" id="rex-search" oninput="renderAllRex()" placeholder="Sous-machine, mot-clé, auteur..." class="bg-white border border-sky-200 rounded-lg px-3 py-2 text-xs text-slate-800 w-80 focus:outline-none focus:border-sky-500">
@@ -223,14 +304,70 @@
       <div id="all-rex-container" class="flex-1 overflow-y-auto space-y-4 pr-2"></div>
     </div>
 
-    <!-- ONGLET 4: MENU GENERAL -->
+    <!-- ONGLET 4: TRAVAUX À FAIRE (GLOBAL) -->
+    <div id="view-travaux" class="flex-1 flex flex-col bg-transparent p-6 overflow-hidden hidden w-full">
+      <div class="flex justify-between items-center mb-5">
+        <div>
+          <h2 class="text-xl font-bold">Travaux à faire — Maintenance & Interventions</h2>
+          <p class="text-xs text-slate-500">Fiches de travaux relevés à effectuer sur la mécanique et les installations.</p>
+        </div>
+        <button onclick="handleAuthAction(() => openAddTravailModal(), 'Technicien')" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-2 shadow-sm">
+          <i data-lucide="clipboard-pen" class="w-4 h-4"></i>
+          <span>Relever un Travail</span>
+        </button>
+      </div>
+
+      <!-- COMPTEURS ET FILTRES RAPIDES -->
+      <div class="grid grid-cols-4 gap-3 mb-4">
+        <div onclick="filterTravauxByStatus('ALL')" class="theme-card p-3 rounded-xl border border-sky-200 cursor-pointer hover:border-sky-400 transition shadow-sm">
+          <div class="text-[10px] uppercase font-bold text-slate-400">Total Relevés</div>
+          <div id="travaux-count-all" class="text-xl font-extrabold text-slate-900 mt-0.5">0</div>
+        </div>
+        <div onclick="filterTravauxByStatus('A_FAIRE')" class="theme-card p-3 rounded-xl border border-red-200 bg-red-50/40 cursor-pointer hover:border-red-400 transition shadow-sm">
+          <div class="text-[10px] uppercase font-bold text-red-600">À faire</div>
+          <div id="travaux-count-afaire" class="text-xl font-extrabold text-red-700 mt-0.5">0</div>
+        </div>
+        <div onclick="filterTravauxByStatus('EN_COURS')" class="theme-card p-3 rounded-xl border border-amber-200 bg-amber-50/40 cursor-pointer hover:border-amber-400 transition shadow-sm">
+          <div class="text-[10px] uppercase font-bold text-amber-600">En cours</div>
+          <div id="travaux-count-encours" class="text-xl font-extrabold text-amber-700 mt-0.5">0</div>
+        </div>
+        <div onclick="filterTravauxByStatus('TERMINE')" class="theme-card p-3 rounded-xl border border-emerald-200 bg-emerald-50/40 cursor-pointer hover:border-emerald-400 transition shadow-sm">
+          <div class="text-[10px] uppercase font-bold text-emerald-600">Terminés</div>
+          <div id="travaux-count-termine" class="text-xl font-extrabold text-emerald-700 mt-0.5">0</div>
+        </div>
+      </div>
+
+      <!-- BARRE DE RECHERCHE ET FILTRES -->
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+          <input type="text" id="travaux-search-input" oninput="renderAllTravaux()" placeholder="Rechercher par titre, machine, description, pièces requises..." class="w-full pl-9 pr-4 py-2 bg-white border border-sky-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-amber-500 shadow-sm">
+        </div>
+        <select id="travaux-priority-filter" onchange="renderAllTravaux()" class="bg-white border border-sky-200 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-amber-500 shadow-sm">
+          <option value="ALL">Toutes les priorités</option>
+          <option value="Critique">Critique / Urgente</option>
+          <option value="Haute">Haute</option>
+          <option value="Moyenne">Moyenne</option>
+          <option value="Basse">Basse</option>
+        </select>
+      </div>
+
+      <div id="all-travaux-container" class="flex-1 overflow-y-auto space-y-3 pr-2"></div>
+    </div>
+
+    <!-- ONGLET 5: MENU GENERAL -->
     <div id="view-menu" class="flex-1 flex bg-transparent overflow-hidden hidden w-full">
-      <aside class="w-64 bg-white/80 backdrop-blur-md border-r border-sky-200 p-4 space-y-2 shrink-0">
+      <aside class="theme-sidebar w-64 border-r p-4 space-y-2 shrink-0">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4 px-2">Menu Principal</h2>
         
         <button onclick="switchMenuSubtab('profil')" id="subnav-profil" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition bg-sky-100 text-sky-900 border border-sky-200">
           <i data-lucide="users" class="w-4 h-4 text-sky-600"></i>
           <span>Gestion des Profils</span>
+        </button>
+
+        <button onclick="switchMenuSubtab('themes')" id="subnav-themes" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition text-slate-600 hover:bg-sky-50 hover:text-slate-900">
+          <i data-lucide="palette" class="w-4 h-4 text-purple-600"></i>
+          <span>Thèmes & Affichage</span>
         </button>
 
         <button onclick="switchMenuSubtab('logs')" id="subnav-logs" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition text-slate-600 hover:bg-sky-50 hover:text-slate-900">
@@ -251,8 +388,8 @@
           <div id="menusub-profil" class="space-y-6">
             <div class="flex justify-between items-center">
               <div>
-                <h2 class="text-xl font-bold text-slate-900 mb-1">Comptes & Utilisateurs</h2>
-                <p class="text-xs text-slate-600">Gérez les comptes d'accès et attribuez les rôles.</p>
+                <h2 class="text-xl font-bold mb-1">Comptes & Utilisateurs</h2>
+                <p class="text-xs text-slate-500">Gérez les comptes d'accès et attribuez les rôles.</p>
               </div>
               <button id="btn-create-user" onclick="handleAuthAction(() => openCreateUserModal(), 'Administrateur')" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold flex items-center space-x-2 shadow-sm">
                 <i data-lucide="user-plus" class="w-4 h-4"></i>
@@ -260,23 +397,63 @@
               </button>
             </div>
 
-            <div class="bg-white/90 border border-sky-200 rounded-xl p-5 flex items-center justify-between shadow-sm">
+            <div class="theme-card border rounded-xl p-5 flex items-center justify-between shadow-sm">
               <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-sky-100 border border-sky-200 text-sky-600 rounded-full flex items-center justify-center font-bold text-lg">
                   <i data-lucide="shield-check" class="w-6 h-6"></i>
                 </div>
                 <div>
-                  <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Compte Actif</div>
-                  <h3 id="current-user-fullname" class="font-bold text-slate-900 text-base">Invité</h3>
+                  <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Compte Actif</div>
+                  <h3 id="current-user-fullname" class="font-bold text-base">Invité</h3>
                   <span id="current-user-badge" class="text-[10px] bg-sky-100 text-sky-700 border border-sky-200 px-2 py-0.5 rounded font-semibold">Consultateur</span>
                 </div>
               </div>
               <button onclick="openLoginModal()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-lg shadow-sm">Changer de compte</button>
             </div>
 
-            <div class="bg-white/90 border border-sky-200 rounded-xl p-5 space-y-4 shadow-sm">
-              <h3 class="text-sm font-bold text-slate-900 border-b border-sky-100 pb-2">Liste des Utilisateurs Enregistrés</h3>
+            <div class="theme-card border rounded-xl p-5 space-y-4 shadow-sm">
+              <h3 class="text-sm font-bold border-b border-sky-100 pb-2">Liste des Utilisateurs Enregistrés</h3>
               <div id="users-list-container" class="space-y-2"></div>
+            </div>
+          </div>
+
+          <!-- SOUS-ONGLET THÈMES & AFFICHAGE -->
+          <div id="menusub-themes" class="space-y-6 hidden">
+            <div>
+              <h2 class="text-xl font-bold mb-1">Thèmes Visuels & Ergonomie</h2>
+              <p class="text-xs text-slate-500">Personnalisez votre interface selon vos conditions d'éclairage ou vos préférences.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <!-- CARTE THÈME CLAIR -->
+              <div onclick="setTheme('light')" class="cursor-pointer border-2 rounded-2xl p-4 transition relative overflow-hidden bg-gradient-to-br from-sky-50 to-white hover:shadow-lg border-sky-300">
+                <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center mb-3 shadow-md">
+                  <i data-lucide="sun" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-sm text-slate-900">Thème Clair</h3>
+                <p class="text-[11px] text-slate-500 mt-1">Palette blanc et bleu ciel haute lisibilité pour usage de jour.</p>
+                <div id="badge-theme-light" class="mt-3 text-[10px] font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full inline-block">Actif</div>
+              </div>
+
+              <!-- CARTE THÈME SOMBRE -->
+              <div onclick="setTheme('dark')" class="cursor-pointer border-2 rounded-2xl p-4 transition relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 hover:shadow-lg border-slate-700">
+                <div class="w-10 h-10 rounded-xl bg-slate-700 text-sky-400 flex items-center justify-center mb-3 shadow-md">
+                  <i data-lucide="moon" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-sm text-white">Thème Sombre</h3>
+                <p class="text-[11px] text-slate-400 mt-1">Noir profond et ardoise pour reposer les yeux en atelier.</p>
+                <div id="badge-theme-dark" class="mt-3 text-[10px] font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded-full inline-block hidden">Actif</div>
+              </div>
+
+              <!-- CARTE THÈME COLORÉ -->
+              <div onclick="setTheme('vibrant')" class="cursor-pointer border-2 rounded-2xl p-4 transition relative overflow-hidden bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 hover:shadow-lg border-purple-300">
+                <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center mb-3 shadow-md">
+                  <i data-lucide="sparkles" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold text-sm text-purple-950">Thème Coloré</h3>
+                <p class="text-[11px] text-purple-800 mt-1">Nuances d'indigo et de violet pour un design moderne.</p>
+                <div id="badge-theme-vibrant" class="mt-3 text-[10px] font-bold text-purple-800 bg-purple-100 px-2 py-0.5 rounded-full inline-block hidden">Actif</div>
+              </div>
             </div>
           </div>
 
@@ -284,8 +461,8 @@
           <div id="menusub-logs" class="space-y-6 hidden">
             <div class="flex justify-between items-center">
               <div>
-                <h2 class="text-xl font-bold text-slate-900 mb-1">Historique d'Activité & Traçabilité</h2>
-                <p class="text-xs text-slate-600">Journal d'audit en temps réel des actions sur le site de Mulhouse.</p>
+                <h2 class="text-xl font-bold mb-1">Historique d'Activité & Traçabilité</h2>
+                <p class="text-xs text-slate-500">Journal d'audit en temps réel des actions sur le site de Mulhouse.</p>
               </div>
               <button onclick="handleAuthAction(() => clearAuditLogs(), 'Administrateur')" id="btn-clear-logs" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center space-x-1.5">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -293,7 +470,7 @@
               </button>
             </div>
 
-            <div class="bg-white/90 border border-sky-200 rounded-xl p-5 space-y-3 shadow-sm">
+            <div class="theme-card border rounded-xl p-5 space-y-3 shadow-sm">
               <div id="audit-logs-container" class="space-y-2 max-h-[500px] overflow-y-auto pr-1"></div>
             </div>
           </div>
@@ -301,16 +478,16 @@
           <!-- SOUS-ONGLET IMPORT / EXPORT -->
           <div id="menusub-sauvegarde" class="space-y-6 hidden">
             <div>
-              <h2 class="text-xl font-bold text-slate-900 mb-1">Gestion des Sauvegardes</h2>
-              <p class="text-xs text-slate-600">Effectuez des imports/exports manuels au format JSON.</p>
+              <h2 class="text-xl font-bold mb-1">Gestion des Sauvegardes</h2>
+              <p class="text-xs text-slate-500">Effectuez des imports/exports manuels au format JSON.</p>
             </div>
 
-            <div class="bg-white/90 border border-sky-200 rounded-xl p-6 space-y-4 shadow-sm">
+            <div class="theme-card border rounded-xl p-6 space-y-4 shadow-sm">
               <div class="flex items-center space-x-3 border-b border-sky-100 pb-3">
                 <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg"><i data-lucide="download" class="w-5 h-5"></i></div>
                 <div>
-                  <h3 class="text-sm font-bold text-slate-900">Sauvegarde Manuelle (Export .json)</h3>
-                  <p class="text-xs text-slate-500">Téléchargez le fichier complet sur votre ordinateur.</p>
+                  <h3 class="text-sm font-bold">Sauvegarde Manuelle (Export .json)</h3>
+                  <p class="text-xs text-slate-400">Téléchargez le fichier complet sur votre ordinateur.</p>
                 </div>
               </div>
               <button onclick="exportBackup()" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-2">
@@ -319,12 +496,12 @@
               </button>
             </div>
 
-            <div class="bg-white/90 border border-sky-200 rounded-xl p-6 space-y-4 shadow-sm">
+            <div class="theme-card border rounded-xl p-6 space-y-4 shadow-sm">
               <div class="flex items-center space-x-3 border-b border-sky-100 pb-3">
                 <div class="p-2 bg-blue-100 text-blue-600 rounded-lg"><i data-lucide="upload" class="w-5 h-5"></i></div>
                 <div>
-                  <h3 class="text-sm font-bold text-slate-900">Restauration (Import .json)</h3>
-                  <p class="text-xs text-slate-500">Chargez un fichier de sauvegarde précédemment exporté.</p>
+                  <h3 class="text-sm font-bold">Restauration (Import .json)</h3>
+                  <p class="text-xs text-slate-400">Chargez un fichier de sauvegarde précédemment exporté.</p>
                 </div>
               </div>
               <input type="file" id="import-file" accept=".json" onchange="importBackup(event)" class="hidden">
@@ -347,7 +524,7 @@
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
-  <!-- MODAL DE CONFIRMATION PERSONNALISÉE (REMPLACE CONFIRM) -->
+  <!-- MODAL DE CONFIRMATION PERSONNALISÉE -->
   <div id="modal-confirm" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white border border-sky-200 rounded-xl w-full max-w-sm overflow-hidden shadow-2xl p-5 space-y-4">
       <div class="flex items-start space-x-3">
@@ -366,7 +543,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE SAISIE PERSONNALISÉE (REMPLACE PROMPT) -->
+  <!-- MODAL DE SAISIE PERSONNALISÉE -->
   <div id="modal-prompt" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white border border-sky-200 rounded-xl w-full max-w-md overflow-hidden shadow-2xl p-5 space-y-4">
       <div class="flex justify-between items-center border-b border-sky-100 pb-2">
@@ -385,14 +562,18 @@
   </div>
 
   <!-- MODALE PREVISUALISATION DOCUMENT / IMAGE (VIEWER) -->
-  <div id="modal-viewer" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[60] hidden">
-    <div class="bg-white border border-sky-200 rounded-xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden shadow-2xl relative">
+  <div id="modal-viewer" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 z-[60] hidden">
+    <div class="bg-white border border-sky-200 rounded-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden shadow-2xl relative">
       <div class="p-3 bg-slate-900 text-white flex justify-between items-center shrink-0">
         <div class="flex items-center space-x-2 overflow-hidden">
           <i data-lucide="file-text" class="w-4 h-4 text-sky-400 shrink-0"></i>
           <span id="viewer-title" class="font-bold text-xs truncate">Aperçu du Document</span>
         </div>
         <div class="flex items-center space-x-2">
+          <a id="viewer-fullscreen-btn" href="#" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-xs font-semibold flex items-center space-x-1 transition">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <span>Plein écran</span>
+          </a>
           <button id="viewer-download-btn" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-semibold flex items-center space-x-1">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span>Télécharger</span>
@@ -400,66 +581,106 @@
           <button onclick="closeViewerModal()" class="p-1 text-slate-300 hover:text-white rounded"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
       </div>
-      <div id="viewer-content" class="flex-1 bg-slate-100 flex items-center justify-center p-2 overflow-hidden"></div>
+      <div id="viewer-content" class="flex-1 bg-slate-100 flex items-center justify-center p-1 overflow-hidden"></div>
     </div>
   </div>
 
-  <!-- MODALE DE CONSULTATION DÉTAILLÉE D'UN REX -->
-  <div id="modal-rex-detail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-    <div class="bg-white border border-sky-200 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-      <div class="p-5 border-b border-sky-100 flex justify-between items-start bg-slate-50/80 shrink-0">
-        <div class="space-y-1">
-          <div class="flex items-center space-x-2">
-            <span id="rex-detail-machine-badge" class="text-[10px] bg-sky-100 text-sky-700 px-2.5 py-0.5 rounded-full border border-sky-200 font-bold uppercase tracking-wider"></span>
-            <span id="rex-detail-date-badge" class="text-xs text-slate-400 font-medium"></span>
-          </div>
-          <h2 id="rex-detail-title" class="text-lg font-bold text-slate-900 leading-snug"></h2>
-          <div class="text-xs text-slate-500">Par <strong id="rex-detail-author" class="text-slate-700"></strong></div>
-        </div>
-        <button onclick="closeRexDetailModal()" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+  <!-- MODALE CRÉATION / MODIFICATION TRAVAIL À FAIRE -->
+  <div id="modal-add-travail" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white border border-amber-300 rounded-xl w-full max-w-lg overflow-hidden shadow-2xl p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-amber-100 pb-3">
+        <h3 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+          <i id="travail-modal-icon" data-lucide="clipboard-pen" class="w-5 h-5 text-amber-600"></i>
+          <span id="travail-modal-title">Relever un Travail à faire</span>
+        </h3>
+        <button onclick="closeAddTravailModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
-      <div class="p-6 overflow-y-auto space-y-5 flex-1">
-        <div id="rex-detail-gain-container" class="p-3 bg-sky-50/70 border border-sky-200 rounded-xl flex items-center space-x-2.5">
-          <div class="p-2 bg-sky-600 text-white rounded-lg shrink-0">
-            <i data-lucide="trending-up" class="w-4 h-4"></i>
-          </div>
-          <div class="text-xs">
-            <span class="text-sky-900 font-bold">Gain apporté :</span>
-            <span id="rex-detail-gain-text" class="text-sky-800 ml-1"></span>
-          </div>
-        </div>
+      <form id="form-travail" onsubmit="saveTravailForm(event)" class="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+        <!-- SÉLECTEUR ARBORESCENT DÉPLIABLE (TRAVAUX) -->
+        <div class="relative">
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Cible / Machine concernée *</label>
+          <input type="hidden" id="travail-select-target" value="ALL_SETS" required>
 
-        <div class="space-y-1.5">
-          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
-            <i data-lucide="align-left" class="w-3.5 h-3.5 text-sky-600"></i>
-            <span>Description de l'intervention / Amélioration</span>
-          </h3>
-          <p id="rex-detail-desc" class="text-xs text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-sky-100 whitespace-pre-line"></p>
-        </div>
-
-        <div class="space-y-2">
-          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
-            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-sky-600"></i>
-            <span id="rex-detail-files-title">Pièces Jointes & Documents</span>
-          </h3>
-          <div id="rex-detail-files-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
-        </div>
-      </div>
-
-      <div class="p-4 border-t border-sky-100 bg-slate-50/80 flex justify-between items-center shrink-0">
-        <div class="flex space-x-2">
-          <button id="rex-detail-btn-print" class="px-3 py-1.5 bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition">
-            <i data-lucide="printer" class="w-3.5 h-3.5 text-sky-600"></i>
-            <span>Imprimer REX</span>
+          <button type="button" id="travail-tree-picker-btn" onclick="toggleTreePickerDropdown('travail')" class="w-full bg-slate-50 border border-sky-200 hover:border-amber-400 rounded-lg p-2.5 text-xs text-left flex items-center justify-between shadow-sm transition focus:outline-none focus:ring-2 focus:ring-amber-400/40">
+            <div class="flex items-center space-x-2 truncate">
+              <i id="travail-picker-icon" data-lucide="layers" class="w-4 h-4 text-amber-600 shrink-0"></i>
+              <span id="travail-picker-label" class="font-bold text-slate-900 truncate">★ TOUS LES ENSEMBLES (Globalité de l'installation)</span>
+            </div>
+            <i id="travail-picker-chevron" data-lucide="chevron-down" class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200"></i>
           </button>
-          <button id="rex-detail-btn-edit" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition">
-            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-            <span>Modifier</span>
-          </button>
+
+          <!-- MENU DÉROULANT ARBORESCENT INTERACTIF -->
+          <div id="travail-tree-picker-dropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-amber-300 rounded-xl shadow-2xl z-30 p-2.5 space-y-2">
+            <div class="relative">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+              <input type="text" id="travail-picker-search" oninput="filterTreePicker('travail')" placeholder="Filtrer une zone, machine..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div class="flex items-center justify-between px-1 text-[11px] text-slate-500 border-b border-slate-100 pb-1.5">
+              <span>Arborescence du site</span>
+              <div class="flex space-x-2">
+                <button type="button" onclick="expandAllPicker('travail')" class="hover:text-amber-700 font-medium transition">Déplier tout</button>
+                <span>•</span>
+                <button type="button" onclick="collapseAllPicker('travail')" class="hover:text-amber-700 font-medium transition">Replier tout</button>
+              </div>
+            </div>
+
+            <div id="travail-picker-tree" class="max-h-56 overflow-y-auto space-y-0.5 pr-1"></div>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-1">Sélectionnez l'ensemble du site ou dépliez l'arborescence pour cibler une machine précise.</p>
         </div>
-        <button onclick="closeRexDetailModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition">Fermer</button>
-      </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Priorité / Degré d'urgence *</label>
+            <select id="travail-input-priority" required class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
+              <option value="Basse">Basse (Amélioration / Confort)</option>
+              <option value="Moyenne" selected>Moyenne (À planifier)</option>
+              <option value="Haute">Haute (Risque d'arrêt)</option>
+              <option value="Critique">Critique / Urgente (Arrêt machine)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Statut *</label>
+            <select id="travail-input-status" required class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
+              <option value="A_FAIRE" selected>À faire</option>
+              <option value="EN_COURS">En cours d'intervention</option>
+              <option value="TERMINE">Terminé</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Titre de l'intervention / anomalie relevée *</label>
+          <input type="text" id="travail-input-title" required placeholder="Ex: Remplacement roulement palier 3..." class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Pièces nécessaires / Outillage requis</label>
+          <input type="text" id="travail-input-pieces" placeholder="Ex: Réf roulement 6205-2RS, graisse HT..." class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-xs text-slate-800 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Description détaillée des travaux à effectuer *</label>
+          <textarea id="travail-input-desc" rows="4" required placeholder="Détaillez le relevé, symptômes constatés, mode opératoire..." class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-xs text-slate-800 focus:outline-none focus:border-amber-500 leading-relaxed"></textarea>
+        </div>
+
+        <div class="p-3 bg-amber-50/50 rounded-lg border border-amber-200 space-y-2">
+          <label class="block text-xs font-semibold text-amber-800 uppercase tracking-wider">Photos / Schémas du défaut</label>
+          <input type="file" id="travail-file-input" multiple accept="image/*,.pdf" onchange="handleTravailFilesSelect(event)" class="hidden">
+          <button type="button" onclick="document.getElementById('travail-file-input').click()" class="w-full bg-white hover:bg-amber-50 border border-amber-200 text-slate-700 rounded p-2.5 text-xs font-medium flex items-center justify-center space-x-2 transition">
+            <i data-lucide="image" class="w-4 h-4 text-amber-600"></i>
+            <span id="text-travail-files">Ajouter des photos/documents...</span>
+          </button>
+          <div id="travail-files-preview" class="grid grid-cols-3 gap-2 pt-2"></div>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2 border-t border-sky-100">
+          <button type="button" onclick="closeAddTravailModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded text-xs font-medium hover:bg-slate-200">Annuler</button>
+          <button type="submit" id="travail-btn-submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-semibold shadow-sm">Enregistrer le Travail</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -475,15 +696,38 @@
       </div>
 
       <form id="form-rex" onsubmit="saveRexForm(event)" class="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-sky-700 uppercase tracking-wider mb-1">Racine (Zone MK) *</label>
-            <select id="rex-select-root" onchange="updateRexSubmachineOptions()" required class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-xs text-slate-800 focus:outline-none focus:border-sky-500"></select>
+        <!-- SÉLECTEUR ARBORESCENT DÉPLIABLE (REX) -->
+        <div class="relative">
+          <label class="block text-xs font-semibold text-sky-700 uppercase tracking-wider mb-1">Machine / Zone concernée *</label>
+          <input type="hidden" id="rex-select-sub" value="" required>
+
+          <button type="button" id="rex-tree-picker-btn" onclick="toggleTreePickerDropdown('rex')" class="w-full bg-slate-50 border border-sky-200 hover:border-sky-500 rounded-lg p-2.5 text-xs text-left flex items-center justify-between shadow-sm transition focus:outline-none focus:ring-2 focus:ring-sky-400/40">
+            <div class="flex items-center space-x-2 truncate">
+              <i id="rex-picker-icon" data-lucide="cpu" class="w-4 h-4 text-sky-600 shrink-0"></i>
+              <span id="rex-picker-label" class="font-bold text-slate-900 truncate">Sélectionner une machine...</span>
+            </div>
+            <i id="rex-picker-chevron" data-lucide="chevron-down" class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200"></i>
+          </button>
+
+          <!-- MENU DÉROULANT ARBORESCENT INTERACTIF -->
+          <div id="rex-tree-picker-dropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-sky-300 rounded-xl shadow-2xl z-30 p-2.5 space-y-2">
+            <div class="relative">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+              <input type="text" id="rex-picker-search" oninput="filterTreePicker('rex')" placeholder="Filtrer une zone, machine..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-sky-500">
+            </div>
+
+            <div class="flex items-center justify-between px-1 text-[11px] text-slate-500 border-b border-slate-100 pb-1.5">
+              <span>Arborescence du site</span>
+              <div class="flex space-x-2">
+                <button type="button" onclick="expandAllPicker('rex')" class="hover:text-sky-700 font-medium transition">Déplier tout</button>
+                <span>•</span>
+                <button type="button" onclick="collapseAllPicker('rex')" class="hover:text-sky-700 font-medium transition">Replier tout</button>
+              </div>
+            </div>
+
+            <div id="rex-picker-tree" class="max-h-56 overflow-y-auto space-y-0.5 pr-1"></div>
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-sky-700 uppercase tracking-wider mb-1">Sous-Machine / Dossier *</label>
-            <select id="rex-select-sub" required class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-xs text-slate-800 focus:outline-none focus:border-sky-500"></select>
-          </div>
+          <p class="text-[10px] text-slate-500 mt-1">Dépliez l'arborescence pour cibler une racine ou une sous-machine précise.</p>
         </div>
 
         <div>
@@ -519,7 +763,7 @@
     </div>
   </div>
 
-  <!-- MODALE CREATION / MODIFICATION MACHINE -->
+  <!-- MODALE CREATION / MODIFICATION MACHINE (UNIFIÉE RACINES & SOUS-MACHINES) -->
   <div id="modal-add-node" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
     <div class="bg-white border border-sky-200 rounded-xl w-full max-w-md overflow-hidden shadow-2xl">
       <div class="p-4 border-b border-sky-100 flex justify-between items-center bg-sky-50/50">
@@ -531,77 +775,70 @@
       </div>
       
       <form id="form-add-node" onsubmit="saveNode(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-        <div id="field-zone-container">
-          <label class="block text-xs font-semibold text-sky-700 uppercase tracking-wider mb-1">Zone MK</label>
-          <input type="text" id="input-zone" class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-sm text-slate-800 focus:outline-none focus:border-sky-500">
+        <div>
+          <label id="input-name-label" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nom de l'élément *</label>
+          <input type="text" id="input-name" required class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-sm text-slate-800 focus:outline-none focus:border-sky-500">
         </div>
 
-        <div id="field-drive-container" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nom de la sous-machine *</label>
-            <input type="text" id="input-name" class="w-full bg-slate-50 border border-sky-200 rounded p-2.5 text-sm text-slate-800 focus:outline-none focus:border-sky-500">
+        <!-- ENCART D'APERÇU DU DOSSIER EN ATTENTE D'IMPORTATION -->
+        <div id="folder-import-preview-box" class="p-3 bg-sky-50 border border-sky-300 rounded-xl space-y-2 hidden">
+          <div class="flex items-center justify-between pb-1.5 border-b border-sky-200">
+            <span class="text-xs font-bold text-sky-900 flex items-center space-x-1.5">
+              <i data-lucide="folder-check" class="w-4 h-4 text-sky-600"></i>
+              <span>Dossier complet prêt à être importé</span>
+            </span>
+            <button type="button" onclick="cancelPendingFolderImport()" class="text-[10px] text-red-600 hover:underline font-semibold">Annuler ce dossier</button>
           </div>
-
-          <!-- ENCART D'APERÇU DU DOSSIER EN ATTENTE D'IMPORTATION -->
-          <div id="folder-import-preview-box" class="p-3 bg-sky-50 border border-sky-300 rounded-xl space-y-2 hidden">
-            <div class="flex items-center justify-between pb-1.5 border-b border-sky-200">
-              <span class="text-xs font-bold text-sky-900 flex items-center space-x-1.5">
-                <i data-lucide="folder-check" class="w-4 h-4 text-sky-600"></i>
-                <span>Dossier complet prêt à être importé</span>
-              </span>
-              <button type="button" onclick="cancelPendingFolderImport()" class="text-[10px] text-red-600 hover:underline font-semibold">Annuler ce dossier</button>
-            </div>
-            <div id="folder-preview-stats" class="text-xs text-slate-700 space-y-1"></div>
-            <div class="pt-1.5 border-t border-sky-200/60 space-y-1">
-              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Mode d'intégration :</span>
-              <label class="flex items-center space-x-2 text-xs text-slate-800 cursor-pointer">
-                <input type="radio" name="folder-import-mode" value="hierarchy" checked class="text-sky-600 focus:ring-sky-500">
-                <span>Créer l'arborescence complète (sous-dossiers automatiques)</span>
-              </label>
-              <label class="flex items-center space-x-2 text-xs text-slate-800 cursor-pointer">
-                <input type="radio" name="folder-import-mode" value="flat" class="text-sky-600 focus:ring-sky-500">
-                <span>Classer tous les fichiers dans cette seule sous-machine</span>
-              </label>
-            </div>
+          <div id="folder-preview-stats" class="text-xs text-slate-700 space-y-1"></div>
+          <div class="pt-1.5 border-t border-sky-200/60 space-y-1">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Mode d'intégration :</span>
+            <label class="flex items-center space-x-2 text-xs text-slate-800 cursor-pointer">
+              <input type="radio" name="folder-import-mode" value="hierarchy" checked class="text-sky-600 focus:ring-sky-500">
+              <span>Créer l'arborescence complète (sous-dossiers automatiques)</span>
+            </label>
+            <label class="flex items-center space-x-2 text-xs text-slate-800 cursor-pointer">
+              <input type="radio" name="folder-import-mode" value="flat" class="text-sky-600 focus:ring-sky-500">
+              <span>Classer tous les fichiers dans cet élément seul</span>
+            </label>
           </div>
-
-          <div id="existing-files-wrapper" class="hidden space-y-1.5">
-            <label class="block text-xs font-semibold text-amber-600 uppercase tracking-wider">Dossiers & Liens enregistrés</label>
-            <div id="existing-files-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
-          </div>
-
-          <div class="pt-2 border-t border-sky-100 space-y-2">
-            <label class="block text-xs font-semibold text-emerald-700 uppercase tracking-wider">Lier un dossier Google Drive / Sheet / Doc</label>
-            <div class="grid grid-cols-1 gap-2">
-              <input type="text" id="input-gdrive-title" placeholder="Nom de la ressource (ex: Dossier complet Google Drive)" class="w-full bg-slate-50 border border-sky-200 rounded p-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
-              <div class="flex space-x-2">
-                <input type="url" id="input-gdrive-url" placeholder="Coller le lien Google Drive https://..." class="flex-1 bg-slate-50 border border-sky-200 rounded p-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
-                <button type="button" onclick="addGoogleDriveLink()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-semibold shrink-0">Ajouter Lien</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="pt-2 border-t border-sky-100 space-y-2">
-            <label class="block text-xs font-semibold text-sky-700 uppercase tracking-wider">Documents PDF, Fichiers & Dossier Drive</label>
-            
-            <input type="file" id="machine-file-picker" multiple accept="application/pdf,image/*,.pdf" onchange="handleMachineFilesUpload(event)" class="hidden">
-            <input type="file" id="machine-folder-picker" webkitdirectory directory multiple onchange="handleMachineFolderUpload(event)" class="hidden">
-
-            <div class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="document.getElementById('machine-file-picker').click()" class="bg-white hover:bg-sky-50 border border-sky-200 text-slate-700 rounded-lg p-2.5 text-xs font-medium flex items-center justify-center space-x-2 transition shadow-sm">
-                <i data-lucide="file-text" class="w-4 h-4 text-red-600"></i>
-                <span id="text-machine-files" class="truncate">Fichiers / PDF</span>
-              </button>
-              <button type="button" onclick="document.getElementById('machine-folder-picker').click()" class="bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-800 rounded-lg p-2.5 text-xs font-semibold flex items-center justify-center space-x-2 transition shadow-sm" title="Importer un dossier Google Drive synchronisé ou dossier local">
-                <i data-lucide="folder-up" class="w-4 h-4 text-sky-600"></i>
-                <span id="text-machine-folder" class="truncate">Dossier Drive / PC</span>
-              </button>
-            </div>
-            <p class="text-[10px] text-slate-400">Importe en 1 clic tous les sous-dossiers, PDF et documents contenus.</p>
-          </div>
-
-          <div id="uploaded-files-list" class="pt-2 space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
         </div>
+
+        <div id="existing-files-wrapper" class="hidden space-y-1.5">
+          <label class="block text-xs font-semibold text-amber-600 uppercase tracking-wider">Dossiers & Liens enregistrés</label>
+          <div id="existing-files-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
+        </div>
+
+        <div class="pt-2 border-t border-sky-100 space-y-2">
+          <label class="block text-xs font-semibold text-emerald-700 uppercase tracking-wider">Lier un dossier Google Drive / Sheet / Doc</label>
+          <div class="grid grid-cols-1 gap-2">
+            <input type="text" id="input-gdrive-title" placeholder="Nom de la ressource (ex: Dossier complet Google Drive)" class="w-full bg-slate-50 border border-sky-200 rounded p-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+            <div class="flex space-x-2">
+              <input type="url" id="input-gdrive-url" placeholder="Coller le lien Google Drive https://..." class="flex-1 bg-slate-50 border border-sky-200 rounded p-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500">
+              <button type="button" onclick="addGoogleDriveLink()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-semibold shrink-0">Ajouter Lien</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-sky-100 space-y-2">
+          <label class="block text-xs font-semibold text-sky-700 uppercase tracking-wider">Documents PDF, Fichiers & Dossier Drive</label>
+          
+          <input type="file" id="machine-file-picker" multiple accept="application/pdf,image/*,.pdf" onchange="handleMachineFilesUpload(event)" class="hidden">
+          <input type="file" id="machine-folder-picker" webkitdirectory directory multiple onchange="handleMachineFolderUpload(event)" class="hidden">
+
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="document.getElementById('machine-file-picker').click()" class="bg-white hover:bg-sky-50 border border-sky-200 text-slate-700 rounded-lg p-2.5 text-xs font-medium flex items-center justify-center space-x-2 transition shadow-sm">
+              <i data-lucide="file-text" class="w-4 h-4 text-red-600"></i>
+              <span id="text-machine-files" class="truncate">Fichiers / PDF</span>
+            </button>
+            <button type="button" onclick="document.getElementById('machine-folder-picker').click()" class="bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-800 rounded-lg p-2.5 text-xs font-semibold flex items-center justify-center space-x-2 transition shadow-sm" title="Importer un dossier Google Drive synchronisé ou dossier local">
+              <i data-lucide="folder-up" class="w-4 h-4 text-sky-600"></i>
+              <span id="text-machine-folder" class="truncate">Dossier Drive / PC</span>
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-400">Importe en 1 clic tous les sous-dossiers, PDF et documents contenus.</p>
+        </div>
+
+        <div id="uploaded-files-list" class="pt-2 space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
 
         <div class="flex justify-end space-x-2 pt-2 border-t border-sky-100">
           <button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-200">Annuler</button>
@@ -631,7 +868,6 @@
         <span id="upload-progress-percent">0%</span>
       </div>
 
-      <!-- BOUTON D'ANNULATION D'URGENCE DU TÉLÉVERSEMENT -->
       <div class="pt-2 border-t border-sky-100 flex justify-center">
         <button type="button" onclick="cancelOngoingImport()" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition">
           <i data-lucide="x-circle" class="w-4 h-4"></i>
@@ -698,7 +934,7 @@
           <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Profil / Droits *</label>
           <select id="input-user-role" class="w-full bg-slate-50 border border-sky-200 rounded p-2 text-xs text-slate-800 focus:outline-none focus:border-sky-500">
             <option value="Administrateur">Administrateur (Tous les droits)</option>
-            <option value="Technicien">Technicien (Création sous-machines, Améliorations)</option>
+            <option value="Technicien">Technicien (Création sous-machines, Améliorations, Travaux)</option>
             <option value="Consultateur">Consultateur (Lecture seule)</option>
           </select>
         </div>
@@ -716,7 +952,161 @@
     </div>
   </div>
 
+  <!-- MODALE DE CONSULTATION DÉTAILLÉE D'UN TRAVAIL -->
+  <div id="modal-travail-detail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white border border-amber-300 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-amber-100 flex justify-between items-start bg-amber-50/60 shrink-0">
+        <div class="space-y-1">
+          <div class="flex items-center space-x-2">
+            <span id="travail-detail-badge-target" class="text-[10px] bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full border border-amber-200 font-bold uppercase tracking-wider"></span>
+            <span id="travail-detail-badge-priority" class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase"></span>
+            <span id="travail-detail-badge-status" class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase"></span>
+            <span id="travail-detail-date-badge" class="text-xs text-slate-400 font-medium"></span>
+          </div>
+          <h2 id="travail-detail-title" class="text-lg font-bold text-slate-900 leading-snug"></h2>
+          <div class="text-xs text-slate-500">Relevé par <strong id="travail-detail-author" class="text-slate-700"></strong></div>
+        </div>
+        <button onclick="closeTravailDetailModal()" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-5 flex-1">
+        <div id="travail-detail-pieces-box" class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl flex items-center space-x-2.5">
+          <div class="p-2 bg-amber-600 text-white rounded-lg shrink-0">
+            <i data-lucide="package" class="w-4 h-4"></i>
+          </div>
+          <div class="text-xs">
+            <span class="text-amber-900 font-bold">Pièces / Outillage requis :</span>
+            <span id="travail-detail-pieces-text" class="text-amber-800 ml-1"></span>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="align-left" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span>Description des travaux à exécuter</span>
+          </h3>
+          <p id="travail-detail-desc" class="text-xs text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-amber-100 whitespace-pre-line"></p>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span id="travail-detail-files-title">Photos & Documents du relevé</span>
+          </h3>
+          <div id="travail-detail-files-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-amber-100 bg-slate-50/80 flex justify-between items-center shrink-0">
+        <div class="flex space-x-2">
+          <button id="travail-detail-btn-print" class="px-3 py-1.5 bg-white hover:bg-amber-50 text-slate-700 border border-amber-200 rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span>Imprimer Ordre de Travail</span>
+          </button>
+          <button id="travail-detail-btn-edit" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition">
+            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+            <span>Modifier</span>
+          </button>
+        </div>
+        <button onclick="closeTravailDetailModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE DE CONSULTATION DÉTAILLÉE D'UN REX -->
+  <div id="modal-rex-detail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white border border-sky-200 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-sky-100 flex justify-between items-start bg-slate-50/80 shrink-0">
+        <div class="space-y-1">
+          <div class="flex items-center space-x-2">
+            <span id="rex-detail-machine-badge" class="text-[10px] bg-sky-100 text-sky-700 px-2.5 py-0.5 rounded-full border border-sky-200 font-bold uppercase tracking-wider"></span>
+            <span id="rex-detail-date-badge" class="text-xs text-slate-400 font-medium"></span>
+          </div>
+          <h2 id="rex-detail-title" class="text-lg font-bold text-slate-900 leading-snug"></h2>
+          <div class="text-xs text-slate-500">Par <strong id="rex-detail-author" class="text-slate-700"></strong></div>
+        </div>
+        <button onclick="closeRexDetailModal()" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-5 flex-1">
+        <div id="rex-detail-gain-container" class="p-3 bg-sky-50/70 border border-sky-200 rounded-xl flex items-center space-x-2.5">
+          <div class="p-2 bg-sky-600 text-white rounded-lg shrink-0">
+            <i data-lucide="trending-up" class="w-4 h-4"></i>
+          </div>
+          <div class="text-xs">
+            <span class="text-sky-900 font-bold">Gain apporté :</span>
+            <span id="rex-detail-gain-text" class="text-sky-800 ml-1"></span>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="align-left" class="w-3.5 h-3.5 text-sky-600"></i>
+            <span>Description de l'intervention / Amélioration</span>
+          </h3>
+          <p id="rex-detail-desc" class="text-xs text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-sky-100 whitespace-pre-line"></p>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-sky-600"></i>
+            <span id="rex-detail-files-title">Pièces Jointes & Documents</span>
+          </h3>
+          <div id="rex-detail-files-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-sky-100 bg-slate-50/80 flex justify-between items-center shrink-0">
+        <div class="flex space-x-2">
+          <button id="rex-detail-btn-print" class="px-3 py-1.5 bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-sky-600"></i>
+            <span>Imprimer REX</span>
+          </button>
+          <button id="rex-detail-btn-edit" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition">
+            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+            <span>Modifier</span>
+          </button>
+        </div>
+        <button onclick="closeRexDetailModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition">Fermer</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    /* GESTIONNAIRE DE THÈMES */
+    let currentTheme = localStorage.getItem('meca_mulhouse_theme') || 'light';
+
+    function applyTheme(theme) {
+      currentTheme = theme;
+      localStorage.setItem('meca_mulhouse_theme', theme);
+      document.documentElement.className = theme;
+
+      const icon = document.getElementById('theme-quick-icon');
+      if (icon) {
+        if (theme === 'light') icon.setAttribute('data-lucide', 'sun');
+        else if (theme === 'dark') icon.setAttribute('data-lucide', 'moon');
+        else icon.setAttribute('data-lucide', 'sparkles');
+      }
+
+      ['light', 'dark', 'vibrant'].forEach(t => {
+        const badge = document.getElementById(`badge-theme-${t}`);
+        if (badge) badge.classList.toggle('hidden', t !== theme);
+      });
+
+      lucide.createIcons();
+    }
+
+    function setTheme(theme) {
+      applyTheme(theme);
+      showToast(`Thème activé : ${theme === 'light' ? 'Clair' : (theme === 'dark' ? 'Sombre' : 'Coloré')}`, 'info');
+    }
+
+    function cycleTheme() {
+      const themes = ['light', 'dark', 'vibrant'];
+      const nextIdx = (themes.indexOf(currentTheme) + 1) % themes.length;
+      setTheme(themes[nextIdx]);
+    }
+
     /* 1. NOTIFICATIONS TOAST ET BOITES DE DIALOGUE PERSONNALISÉES */
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
@@ -848,7 +1238,6 @@
         const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
         const filePath = `${folder}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${cleanName}`;
 
-        // Protection par Timeout : 12 secondes maximum par fichier pour éviter tout blocage indéfini
         const timeoutPromise = new Promise((_, reject) => 
           setTimeout(() => reject(new Error("Timeout upload Supabase")), 12000)
         );
@@ -891,16 +1280,22 @@
     let currentParentId = null;
     let editingNodeId = null;
     let editingRexId = null;
+    let editingTravailId = null;
     let existingFilesList = [];
     let newUploadFilesList = [];
     let rexAttachedImages = [];
+    let travailAttachedImages = [];
     let copiedNodeBuffer = null;
     let currentTreeSearchQuery = "";
     let currentViewerBlobUrl = null;
     let pendingFolderUploadFiles = null;
-    let lastImportedRootNodeIds = [];
     let isImportCancelled = false;
     let currentImportCreatedNodeIds = [];
+    let currentTravauxStatusFilter = "ALL";
+    let activeMachineSubTab = "rex";
+
+    // ÉTAT D'EXPANSION LOCAL (INDÉPENDANT ENTRE UTILISATEURS)
+    let localExpandedNodeIds = new Set(['node_1']);
 
     const GUEST_USER = { 
       id: 'guest', 
@@ -917,9 +1312,7 @@
     function getInitialLocalUser() {
       try {
         const savedSession = sessionStorage.getItem('meca_local_user');
-        if (savedSession) {
-          return JSON.parse(savedSession);
-        }
+        if (savedSession) return JSON.parse(savedSession);
       } catch(e) {}
       return GUEST_USER;
     }
@@ -934,13 +1327,13 @@
         {
           id: 'node_1',
           parentId: null,
-          expanded: true,
           zoneMk: 'Zone 1 - Réception',
           name: '',
           files: []
         }
       ],
-      rexList: []
+      rexList: [],
+      travauxList: []
     };
 
     function addAuditLog(action, details = "") {
@@ -977,6 +1370,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
+      applyTheme(currentTheme);
       applyUserPermissions();
       renderTree();
       renderNodeDetail();
@@ -1063,6 +1457,7 @@
           if (cloudData) {
             if (cloudData.tree) state.tree = cloudData.tree;
             if (cloudData.rexList) state.rexList = cloudData.rexList;
+            if (cloudData.travauxList) state.travauxList = cloudData.travauxList;
             if (cloudData.synoptiqueUrl !== undefined) state.synoptiqueUrl = cloudData.synoptiqueUrl;
             if (cloudData.users) state.users = cloudData.users;
             if (cloudData.auditLogs) state.auditLogs = cloudData.auditLogs;
@@ -1075,6 +1470,7 @@
             const parsed = JSON.parse(local);
             state.tree = parsed.tree || state.tree;
             state.rexList = parsed.rexList || state.rexList;
+            state.travauxList = parsed.travauxList || state.travauxList;
             state.synoptiqueUrl = parsed.synoptiqueUrl || state.synoptiqueUrl;
             state.users = parsed.users || state.users;
             state.auditLogs = parsed.auditLogs || state.auditLogs;
@@ -1100,6 +1496,7 @@
         users: state.users,
         tree: state.tree,
         rexList: state.rexList,
+        travauxList: state.travauxList,
         synoptiqueUrl: state.synoptiqueUrl,
         auditLogs: state.auditLogs || []
       };
@@ -1134,13 +1531,52 @@
       }
     }
 
+    // Remonte d'un niveau vers le parent dans l'arborescence
+    function navigateUpTree() {
+      const currentNode = state.tree.find(n => n.id === state.selectedId);
+      if (currentNode && currentNode.parentId) {
+        selectNode(currentNode.parentId);
+      }
+    }
+
+    // Génère le fil d'ariane (ex: Racine > Machine A > Sous-Machine B)
+    function renderBreadcrumb(node) {
+      const container = document.getElementById('breadcrumb-container');
+      if (!container) return;
+
+      if (!node) {
+        container.innerHTML = '';
+        return;
+      }
+
+      const path = [];
+      let curr = node;
+      while (curr) {
+        path.unshift(curr);
+        curr = state.tree.find(n => n.id === curr.parentId);
+      }
+
+      container.innerHTML = path.map((item, idx) => {
+        const isLast = idx === path.length - 1;
+        const name = item.parentId === null ? (item.zoneMk || 'Racine') : (item.name || 'Sous-machine');
+        if (isLast) {
+          return `<span class="text-slate-700 font-bold">${name}</span>`;
+        }
+        return `<span onclick="selectNode('${item.id}')" class="hover:underline cursor-pointer text-sky-600">${name}</span>
+                <i data-lucide="chevron-right" class="w-3 h-3 text-slate-400"></i>`;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
     function switchTab(tab) {
       document.getElementById('view-eldph').classList.toggle('hidden', tab !== 'eldph');
       document.getElementById('view-synoptique').classList.toggle('hidden', tab !== 'synoptique');
       document.getElementById('view-rex').classList.toggle('hidden', tab !== 'rex');
+      document.getElementById('view-travaux').classList.toggle('hidden', tab !== 'travaux');
       document.getElementById('view-menu').classList.toggle('hidden', tab !== 'menu');
 
-      ['eldph', 'synoptique', 'rex', 'menu'].forEach(t => {
+      ['eldph', 'synoptique', 'rex', 'travaux', 'menu'].forEach(t => {
         const btn = document.getElementById(`nav-${t}`);
         if (btn) {
           btn.className = (t === tab) 
@@ -1150,15 +1586,17 @@
       });
 
       if (tab === 'rex') renderAllRex();
+      if (tab === 'travaux') renderAllTravaux();
       if (tab === 'synoptique') renderSynoptique();
     }
 
     function switchMenuSubtab(subtab) {
       document.getElementById('menusub-profil').classList.toggle('hidden', subtab !== 'profil');
+      document.getElementById('menusub-themes').classList.toggle('hidden', subtab !== 'themes');
       document.getElementById('menusub-logs').classList.toggle('hidden', subtab !== 'logs');
       document.getElementById('menusub-sauvegarde').classList.toggle('hidden', subtab !== 'sauvegarde');
 
-      ['profil', 'logs', 'sauvegarde'].forEach(st => {
+      ['profil', 'themes', 'logs', 'sauvegarde'].forEach(st => {
         const btn = document.getElementById(`subnav-${st}`);
         if (btn) {
           btn.className = st === subtab
@@ -1171,15 +1609,18 @@
     function applyUserPermissions() {
       const role = state.activeUser ? state.activeUser.role : 'Consultateur';
       const isGuest = !state.activeUser || state.activeUser.id === 'guest';
-      const isAdmin = role === 'Administrateur';
-      const isTechOrAdmin = role === 'Administrateur' || role === 'Technicien';
 
       const userFullname = isGuest ? 'Invité' : `${state.activeUser.firstname} ${state.activeUser.lastname}`.trim();
       
-      document.getElementById('topbar-user-fullname').innerText = userFullname;
-      document.getElementById('topbar-user-role').innerText = role;
-      document.getElementById('current-user-fullname').innerText = userFullname;
-      document.getElementById('current-user-badge').innerText = role;
+      const topName = document.getElementById('topbar-user-fullname');
+      const topRole = document.getElementById('topbar-user-role');
+      const curName = document.getElementById('current-user-fullname');
+      const curBadge = document.getElementById('current-user-badge');
+
+      if (topName) topName.innerText = userFullname;
+      if (topRole) topRole.innerText = role;
+      if (curName) curName.innerText = userFullname;
+      if (curBadge) curBadge.innerText = role;
 
       const btnLogin = document.getElementById('btn-login-trigger');
       const btnLogout = document.getElementById('btn-logout-trigger');
@@ -1248,7 +1689,7 @@
       const children = state.tree.filter(n => n.parentId === node.id);
       const isSelected = node.id === state.selectedId;
       const isRacine = node.parentId === null;
-      const autoExpanded = currentTreeSearchQuery ? true : node.expanded;
+      const autoExpanded = currentTreeSearchQuery ? true : localExpandedNodeIds.has(node.id);
       const isGuest = !state.activeUser || state.activeUser.id === 'guest';
 
       const wrapper = document.createElement('div');
@@ -1257,7 +1698,7 @@
       const item = document.createElement('div');
       const isMatch = currentTreeSearchQuery && ((node.name || node.zoneMk || '').toLowerCase().includes(currentTreeSearchQuery));
       
-      item.className = `flex items-center justify-between p-2 rounded-lg cursor-pointer transition border text-xs ${isSelected ? 'bg-sky-100 border-sky-300 text-sky-900 font-semibold shadow-sm' : (isMatch ? 'bg-amber-50 border-amber-300 text-amber-900 font-medium' : 'bg-white/60 border-sky-100 text-slate-700 hover:bg-white hover:text-slate-900')}`;
+      item.className = `flex items-center justify-between p-2 rounded-lg cursor-pointer transition border text-xs ${isSelected ? 'bg-sky-100 border-sky-300 text-sky-900 font-semibold shadow-sm' : (isMatch ? 'bg-amber-50 border-amber-300 text-amber-900 font-medium' : 'theme-node-hover bg-white/60 border-sky-100 text-slate-700')}`;
       
       item.onclick = (e) => {
         e.stopPropagation();
@@ -1297,12 +1738,12 @@
 
     function toggleExpand(id, e) {
       e.stopPropagation();
-      const node = state.tree.find(n => n.id === id);
-      if (node) {
-        node.expanded = !node.expanded;
-        saveState();
-        renderTree();
+      if (localExpandedNodeIds.has(id)) {
+        localExpandedNodeIds.delete(id);
+      } else {
+        localExpandedNodeIds.add(id);
       }
+      renderTree();
     }
 
     function selectNode(id) {
@@ -1314,12 +1755,14 @@
     function renderNodeDetail() {
       const node = state.tree.find(n => n.id === state.selectedId);
       const rexContainer = document.getElementById('node-rex-container');
+      const travauxContainer = document.getElementById('node-travaux-container');
       const previewContainer = document.getElementById('drive-preview-container');
       const deleteBtn = document.getElementById('btn-delete-node');
       const editBtn = document.getElementById('btn-edit-node');
       const copyBtn = document.getElementById('btn-copy-node');
       const pasteBtn = document.getElementById('btn-paste-node');
       const printBtn = document.getElementById('btn-print-machine');
+      const backBtn = document.getElementById('btn-navigate-back');
 
       const isGuest = !state.activeUser || state.activeUser.id === 'guest';
       const isAdmin = state.activeUser && state.activeUser.role === 'Administrateur';
@@ -1327,8 +1770,11 @@
 
       if (!node) {
         document.getElementById('detail-title').innerText = 'Sélectionnez un élément';
+        if (backBtn) backBtn.classList.add('hidden');
+        renderBreadcrumb(null);
         previewContainer.innerHTML = '';
-        rexContainer.innerHTML = '';
+        if (rexContainer) rexContainer.innerHTML = '';
+        if (travauxContainer) travauxContainer.innerHTML = '';
         if (deleteBtn) deleteBtn.classList.add('hidden');
         if (editBtn) editBtn.classList.add('hidden');
         if (copyBtn) copyBtn.classList.add('hidden');
@@ -1336,6 +1782,12 @@
         if (printBtn) printBtn.classList.add('hidden');
         return;
       }
+
+      // Mise à jour du bouton Retour et du Fil d'Ariane
+      if (backBtn) {
+        backBtn.classList.toggle('hidden', !node.parentId);
+      }
+      renderBreadcrumb(node);
 
       if (deleteBtn) deleteBtn.classList.toggle('hidden', !isAdmin);
       if (editBtn) editBtn.classList.toggle('hidden', !isTechOrAdmin);
@@ -1419,67 +1871,12 @@
             filesHeaderDOM.innerHTML = `<span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Ressources & Fichiers de la machine (${node.files.length})</span>`;
             contentDOM.appendChild(filesHeaderDOM);
 
-            const folderGroups = {};
-            const directFiles = [];
-
+            const directFilesGrid = document.createElement('div');
+            directFilesGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1";
             node.files.forEach(f => {
-              const folderName = f.folder || (f.relativePath ? f.relativePath.split('/')[0] : null);
-              if (folderName) {
-                if (!folderGroups[folderName]) folderGroups[folderName] = [];
-                folderGroups[folderName].push(f);
-              } else {
-                directFiles.push(f);
-              }
+              directFilesGrid.appendChild(createFileCardDOM(f));
             });
-
-            Object.keys(folderGroups).forEach(fldrName => {
-              const groupFiles = folderGroups[fldrName];
-              const pdfCount = groupFiles.filter(f => f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf'))).length;
-
-              const folderContainer = document.createElement('div');
-              folderContainer.className = "p-3 bg-sky-50/60 border border-sky-300 rounded-xl space-y-3 mb-3 shadow-sm";
-
-              folderContainer.innerHTML = `
-                <div class="flex items-center justify-between pb-2 border-b border-sky-200">
-                  <div class="flex items-center space-x-2">
-                    <div class="p-1.5 bg-sky-600 text-white rounded-lg shadow-sm">
-                      <i data-lucide="folder-open" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                      <h4 class="text-xs font-bold text-slate-900 leading-tight">Dossier : ${fldrName}</h4>
-                      <p class="text-[10px] text-sky-700 font-semibold">${groupFiles.length} fichier(s) inclus ${pdfCount > 0 ? `• ${pdfCount} PDF` : ''}</p>
-                    </div>
-                  </div>
-                  <span class="text-[9px] bg-white text-sky-800 border border-sky-200 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Dossier</span>
-                </div>
-              `;
-
-              const folderFilesGrid = document.createElement('div');
-              folderFilesGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5";
-
-              groupFiles.forEach(f => {
-                folderFilesGrid.appendChild(createFileCardDOM(f));
-              });
-
-              folderContainer.appendChild(folderFilesGrid);
-              contentDOM.appendChild(folderContainer);
-            });
-
-            if (directFiles.length > 0) {
-              if (Object.keys(folderGroups).length > 0) {
-                const directHeader = document.createElement('div');
-                directHeader.className = "text-[11px] font-bold text-slate-500 uppercase tracking-wider pt-2 pb-1";
-                directHeader.innerText = `Fichiers et liens individuels (${directFiles.length})`;
-                contentDOM.appendChild(directHeader);
-              }
-
-              const directFilesGrid = document.createElement('div');
-              directFilesGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1";
-              directFiles.forEach(f => {
-                directFilesGrid.appendChild(createFileCardDOM(f));
-              });
-              contentDOM.appendChild(directFilesGrid);
-            }
+            contentDOM.appendChild(directFilesGrid);
           }
         }
 
@@ -1494,9 +1891,14 @@
         `;
       }
 
+      // GESTION DES SOUS-ONGLETS INFÉRIEURS (REX ET TRAVAUX)
       const rexs = state.rexList.filter(r => r.nodeId === node.id);
-      rexContainer.innerHTML = '';
+      const travaux = state.travauxList.filter(t => t.nodeId === node.id || t.nodeId === 'ALL_SETS');
 
+      document.getElementById('tab-label-machine-rex').innerText = `Améliorations (${rexs.length})`;
+      document.getElementById('tab-label-machine-travaux').innerText = `Travaux à faire (${travaux.length})`;
+
+      rexContainer.innerHTML = '';
       if (rexs.length === 0) {
         rexContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs border-2 border-dashed border-sky-200/80 rounded-xl bg-white/40">Aucune Amélioration enregistrée pour cet élément.</div>`;
       } else {
@@ -1505,7 +1907,45 @@
         });
       }
 
+      travauxContainer.innerHTML = '';
+      if (travaux.length === 0) {
+        travauxContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs border-2 border-dashed border-amber-200/80 rounded-xl bg-white/40">Aucun travail relevé pour cet élément.</div>`;
+      } else {
+        travaux.forEach(trv => {
+          travauxContainer.appendChild(createTravailCardDOM(trv));
+        });
+      }
+
       lucide.createIcons();
+    }
+
+    function switchMachineSubTab(subTab) {
+      activeMachineSubTab = subTab;
+      const isRex = subTab === 'rex';
+      document.getElementById('node-rex-container').classList.toggle('hidden', !isRex);
+      document.getElementById('node-travaux-container').classList.toggle('hidden', isRex);
+
+      const btnRex = document.getElementById('tab-btn-machine-rex');
+      const btnTrv = document.getElementById('tab-btn-machine-travaux');
+
+      btnRex.className = isRex 
+        ? "px-3 py-1 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-sky-600 text-white shadow-sm"
+        : "px-3 py-1 rounded-md text-xs font-bold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900 hover:bg-white/60";
+
+      btnTrv.className = !isRex 
+        ? "px-3 py-1 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-amber-600 text-white shadow-sm"
+        : "px-3 py-1 rounded-md text-xs font-bold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900 hover:bg-white/60";
+    }
+
+    function convertGoogleDriveViewToPreview(url) {
+      if (!url || typeof url !== 'string') return url;
+      if (url.includes('drive.google.com/file/d/')) {
+        const idMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (idMatch && idMatch[1]) {
+          return `https://drive.google.com/file/d/${idMatch[1]}/preview`;
+        }
+      }
+      return url;
     }
 
     function handleFileClick(file) {
@@ -1518,7 +1958,7 @@
       }
 
       const isImg = file.type && file.type.startsWith('image/');
-      const isPdf = file.type === 'application/pdf' || (file.name && file.name.toLowerCase().endsWith('.pdf')) || file.dataUrl.includes('application/pdf');
+      const isPdf = file.type === 'application/pdf' || (file.name && file.name.toLowerCase().endsWith('.pdf')) || file.dataUrl.includes('application/pdf') || file.dataUrl.includes('drive.google.com');
 
       if (isImg || isPdf) {
         openViewerModal(file);
@@ -1535,9 +1975,7 @@
         const base64 = parts[1] || parts[0];
         const binary = atob(base64);
         const array = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          array[i] = binary.charCodeAt(i);
-        }
+        for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
         const fileType = file.type || 'application/octet-stream';
         const blob = new Blob([array], { type: fileType });
         const blobUrl = URL.createObjectURL(blob);
@@ -1554,12 +1992,85 @@
       }
     }
 
+    function openViewerModal(file) {
+      if (!state.activeUser || state.activeUser.id === 'guest') {
+        showToast("Accès restreint : Connectez-vous pour prévisualiser les documents.", 'warning');
+        openLoginModal();
+        return;
+      }
+
+      const modal = document.getElementById('modal-viewer');
+      const title = document.getElementById('viewer-title');
+      const content = document.getElementById('viewer-content');
+      const dlBtn = document.getElementById('viewer-download-btn');
+      const fsBtn = document.getElementById('viewer-fullscreen-btn');
+
+      if (currentViewerBlobUrl) {
+        URL.revokeObjectURL(currentViewerBlobUrl);
+        currentViewerBlobUrl = null;
+      }
+
+      const normalized = normalizeRexFile(file, file.name || 'Document');
+      if (!normalized) return;
+
+      title.innerText = normalized.name;
+      content.innerHTML = '';
+
+      let displayUrl = convertGoogleDriveViewToPreview(normalized.dataUrl);
+      const isDrivePreview = displayUrl.includes('drive.google.com/file/d/') && displayUrl.includes('/preview');
+      const isPdf = normalized.type === 'application/pdf' || (normalized.name && normalized.name.toLowerCase().endsWith('.pdf')) || displayUrl.includes('application/pdf') || isDrivePreview;
+      const isImg = normalized.type && normalized.type.startsWith('image/');
+
+      if (fsBtn) {
+        fsBtn.href = normalized.dataUrl;
+      }
+
+      if (isPdf) {
+        content.innerHTML = `
+          <div class="w-full h-full flex flex-col bg-slate-900 rounded-lg overflow-hidden border border-slate-700">
+            <iframe src="${displayUrl}" class="w-full h-full border-0 bg-white" allow="autoplay"></iframe>
+          </div>
+        `;
+      } else if (isImg) {
+        content.innerHTML = `<img src="${displayUrl}" class="max-h-full max-w-full object-contain rounded shadow-md">`;
+      } else {
+        content.innerHTML = `
+          <div class="text-center p-6 space-y-3">
+            <i data-lucide="file" class="w-12 h-12 text-slate-400 mx-auto"></i>
+            <p class="text-xs text-slate-600 font-medium">${normalized.name}</p>
+            <a href="${displayUrl}" target="_blank" class="px-3.5 py-2 bg-sky-600 text-white text-xs font-semibold rounded-lg shadow-sm">Consulter le document</a>
+          </div>
+        `;
+      }
+
+      dlBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = displayUrl;
+        a.download = normalized.name || 'document';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeViewerModal() {
+      document.getElementById('modal-viewer').classList.add('hidden');
+      if (currentViewerBlobUrl) {
+        URL.revokeObjectURL(currentViewerBlobUrl);
+        currentViewerBlobUrl = null;
+      }
+    }
+
     function createFileCardDOM(f) {
       const isDrive = f.type === 'googledrive' || (f.dataUrl && f.dataUrl.includes('drive.google'));
       const isSheet = f.type === 'googlesheet' || (f.type && f.type.includes('sheet'));
       const isDoc = f.type === 'googledoc' || (f.type && f.type.includes('doc'));
       const isImg = f.type && f.type.startsWith('image/');
-      const isPdf = f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf')) || (f.dataUrl && f.dataUrl.includes('application/pdf'));
+      const isPdf = f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf')) || (f.dataUrl && f.dataUrl.includes('application/pdf')) || isDrive;
 
       const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
       const deleteBtnHTML = isTechOrAdmin ? `
@@ -1656,204 +2167,555 @@
       return null;
     }
 
-    function openViewerModal(file) {
-      if (!state.activeUser || state.activeUser.id === 'guest') {
-        showToast("Accès restreint : Connectez-vous pour prévisualiser les documents.", 'warning');
-        openLoginModal();
+    const pickerState = {
+      travail: { open: false, expanded: new Set(), filter: '' },
+      rex: { open: false, expanded: new Set(), filter: '' }
+    };
+
+    function toggleTreePickerDropdown(type) {
+      const dropdown = document.getElementById(`${type}-tree-picker-dropdown`);
+      const chevron = document.getElementById(`${type}-picker-chevron`);
+      if (!dropdown) return;
+
+      pickerState[type].open = !pickerState[type].open;
+      dropdown.classList.toggle('hidden', !pickerState[type].open);
+      if (chevron) chevron.style.transform = pickerState[type].open ? 'rotate(180deg)' : 'rotate(0deg)';
+
+      if (pickerState[type].open) {
+        renderTreePicker(type);
+        const searchInput = document.getElementById(`${type}-picker-search`);
+        if (searchInput) searchInput.focus();
+      }
+    }
+
+    function filterTreePicker(type) {
+      const input = document.getElementById(`${type}-picker-search`);
+      pickerState[type].filter = (input?.value || '').toLowerCase().trim();
+      renderTreePicker(type);
+    }
+
+    function expandAllPicker(type) {
+      state.tree.forEach(n => pickerState[type].expanded.add(n.id));
+      renderTreePicker(type);
+    }
+
+    function collapseAllPicker(type) {
+      pickerState[type].expanded.clear();
+      renderTreePicker(type);
+    }
+
+    function togglePickerNodeExpand(type, nodeId, e) {
+      if (e) e.stopPropagation();
+      if (pickerState[type].expanded.has(nodeId)) {
+        pickerState[type].expanded.delete(nodeId);
+      } else {
+        pickerState[type].expanded.add(nodeId);
+      }
+      renderTreePicker(type);
+    }
+
+    function selectPickerNode(type, nodeId, label) {
+      if (type === 'travail') {
+        document.getElementById('travail-select-target').value = nodeId;
+        document.getElementById('travail-picker-label').innerText = label;
+        const icon = document.getElementById('travail-picker-icon');
+        if (icon) {
+          icon.setAttribute('data-lucide', nodeId === 'ALL_SETS' ? 'layers' : 'cpu');
+        }
+      } else {
+        document.getElementById('rex-select-sub').value = nodeId;
+        document.getElementById('rex-picker-label').innerText = label;
+      }
+
+      toggleTreePickerDropdown(type);
+      lucide.createIcons();
+    }
+
+    function renderTreePicker(type) {
+      const container = document.getElementById(`${type}-picker-tree`);
+      if (!container) return;
+      container.innerHTML = '';
+
+      const currentSelected = type === 'travail' 
+        ? document.getElementById('travail-select-target').value 
+        : document.getElementById('rex-select-sub').value;
+
+      const filter = pickerState[type].filter;
+
+      // Option globale uniquement pour Travaux
+      if (type === 'travail' && (!filter || 'tous les ensembles'.includes(filter) || 'globalite'.includes(filter))) {
+        const allOption = document.createElement('div');
+        const isAllSelected = currentSelected === 'ALL_SETS';
+        allOption.className = `p-2 rounded-lg cursor-pointer flex items-center justify-between text-xs transition ${isAllSelected ? 'bg-amber-100 font-bold text-amber-950 border border-amber-300' : 'hover:bg-amber-50 text-slate-700'}`;
+        allOption.onclick = () => selectPickerNode('travail', 'ALL_SETS', "★ TOUS LES ENSEMBLES (Globalité de l'installation)");
+        allOption.innerHTML = `
+          <div class="flex items-center space-x-2 truncate">
+            <i data-lucide="layers" class="w-4 h-4 text-amber-600 shrink-0"></i>
+            <span class="truncate">★ TOUS LES ENSEMBLES (Globalité de l'installation)</span>
+          </div>
+          ${isAllSelected ? '<i data-lucide="check" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>' : ''}
+        `;
+        container.appendChild(allOption);
+      }
+
+      const roots = state.tree.filter(n => n.parentId === null);
+
+      function buildPickerNodesRecursive(nodes, depth) {
+        nodes.forEach(node => {
+          const children = state.tree.filter(c => c.parentId === node.id);
+          const isRacine = node.parentId === null;
+          const nodeName = isRacine ? (node.zoneMk || 'Racine') : (node.name || 'Sous-machine');
+          const isSelected = node.id === currentSelected;
+
+          const isMatching = !filter || nodeName.toLowerCase().includes(filter);
+          const hasMatchingChild = filter && state.tree.some(c => c.parentId === node.id && (c.name || '').toLowerCase().includes(filter));
+
+          if (filter && !isMatching && !hasMatchingChild) return;
+
+          const autoExpanded = filter ? true : pickerState[type].expanded.has(node.id);
+
+          const row = document.createElement('div');
+          row.style.paddingLeft = `${depth * 14}px`;
+          row.className = `p-1.5 rounded-lg cursor-pointer flex items-center justify-between text-xs transition my-0.5 ${isSelected ? 'bg-sky-100 font-bold text-sky-950 border border-sky-300' : 'hover:bg-slate-100 text-slate-800'}`;
+          
+          row.onclick = () => selectPickerNode(type, node.id, nodeName);
+
+          row.innerHTML = `
+            <div class="flex items-center space-x-1.5 truncate">
+              ${children.length > 0 ? `
+                <button type="button" onclick="togglePickerNodeExpand('${type}', '${node.id}', event)" class="p-0.5 hover:bg-slate-200 rounded text-slate-500">
+                  <i data-lucide="${autoExpanded ? 'chevron-down' : 'chevron-right'}" class="w-3.5 h-3.5"></i>
+                </button>
+              ` : '<span class="w-4"></span>'}
+              <i data-lucide="${isRacine ? 'factory' : 'cpu'}" class="w-3.5 h-3.5 ${isSelected ? 'text-sky-600' : 'text-slate-400'} shrink-0"></i>
+              <span class="truncate">${nodeName}</span>
+            </div>
+            ${isSelected ? '<i data-lucide="check" class="w-3.5 h-3.5 text-sky-700 shrink-0"></i>' : ''}
+          `;
+
+          container.appendChild(row);
+
+          if (children.length > 0 && autoExpanded) {
+            buildPickerNodesRecursive(children, depth + 1);
+          }
+        });
+      }
+
+      buildPickerNodesRecursive(roots, 0);
+      lucide.createIcons();
+    }
+
+    function filterTravauxByStatus(status) {
+      currentTravauxStatusFilter = status;
+      renderAllTravaux();
+    }
+
+    function renderAllTravaux() {
+      const container = document.getElementById('all-travaux-container');
+      if (!container) return;
+
+      const search = (document.getElementById('travaux-search-input')?.value || '').toLowerCase().trim();
+      const priorityFilter = document.getElementById('travaux-priority-filter')?.value || 'ALL';
+
+      // Calcul des compteurs
+      const allList = state.travauxList || [];
+      const afaire = allList.filter(t => t.status === 'A_FAIRE').length;
+      const encours = allList.filter(t => t.status === 'EN_COURS').length;
+      const termine = allList.filter(t => t.status === 'TERMINE').length;
+
+      document.getElementById('travaux-count-all').innerText = allList.length;
+      document.getElementById('travaux-count-afaire').innerText = afaire;
+      document.getElementById('travaux-count-encours').innerText = encours;
+      document.getElementById('travaux-count-termine').innerText = termine;
+
+      container.innerHTML = '';
+
+      const filtered = allList.filter(t => {
+        const matchStatus = (currentTravauxStatusFilter === 'ALL' || t.status === currentTravauxStatusFilter);
+        const matchPriority = (priorityFilter === 'ALL' || t.priority === priorityFilter);
+        
+        let targetName = 'Tous les ensembles';
+        if (t.nodeId !== 'ALL_SETS') {
+          const n = state.tree.find(node => node.id === t.nodeId);
+          targetName = n ? (n.parentId === null ? n.zoneMk : n.name) : '';
+        }
+
+        const matchSearch = !search || 
+          (t.title || '').toLowerCase().includes(search) || 
+          (t.description || '').toLowerCase().includes(search) || 
+          (t.pieces || '').toLowerCase().includes(search) || 
+          (t.author || '').toLowerCase().includes(search) ||
+          targetName.toLowerCase().includes(search);
+
+        return matchStatus && matchPriority && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-12 text-slate-400 text-xs">Aucun travail correspondant aux filtres.</div>`;
         return;
       }
 
-      const modal = document.getElementById('modal-viewer');
-      const title = document.getElementById('viewer-title');
-      const content = document.getElementById('viewer-content');
-      const dlBtn = document.getElementById('viewer-download-btn');
+      filtered.forEach(t => {
+        container.appendChild(createTravailCardDOM(t));
+      });
 
-      if (currentViewerBlobUrl) {
-        URL.revokeObjectURL(currentViewerBlobUrl);
-        currentViewerBlobUrl = null;
+      lucide.createIcons();
+    }
+
+    function createTravailCardDOM(t) {
+      let targetName = "★ TOUS LES ENSEMBLES (Globalité)";
+      if (t.nodeId !== 'ALL_SETS') {
+        const node = state.tree.find(n => n.id === t.nodeId);
+        targetName = node ? (node.parentId === null ? node.zoneMk : node.name) : 'Mulhouse';
       }
 
-      const normalized = normalizeRexFile(file, file.name || 'Document');
-      if (!normalized) return;
-
-      title.innerText = normalized.name;
-      content.innerHTML = '';
-
-      const isPdf = normalized.type === 'application/pdf' || (normalized.name && normalized.name.toLowerCase().endsWith('.pdf')) || normalized.dataUrl.includes('application/pdf');
-      const isImg = normalized.type && normalized.type.startsWith('image/');
-
-      let displayUrl = normalized.dataUrl;
-
-      if (normalized.dataUrl.startsWith('data:')) {
-        try {
-          const parts = normalized.dataUrl.split(',');
-          const detectedMime = parts[0].match(/:(.*?);/)?.[1];
-          const finalMime = isPdf ? 'application/pdf' : (detectedMime || 'application/octet-stream');
-          const b64 = atob(parts[1] || parts[0]);
-          const u8 = new Uint8Array(b64.length);
-          for (let i = 0; i < b64.length; i++) u8[i] = b64.charCodeAt(i);
-          const blob = new Blob([u8], { type: finalMime });
-          currentViewerBlobUrl = URL.createObjectURL(blob);
-          displayUrl = currentViewerBlobUrl;
-        } catch(err) {
-          displayUrl = normalized.dataUrl;
-        }
-      }
-
-      if (isPdf) {
-        content.innerHTML = `
-          <div class="w-full h-full flex flex-col bg-slate-900 rounded-lg overflow-hidden border border-slate-700">
-            <div class="bg-slate-800 text-slate-200 px-3 py-2 flex justify-between items-center text-xs shrink-0 border-b border-slate-700">
-              <span class="flex items-center space-x-1.5 text-slate-300 font-medium truncate">
-                <i data-lucide="file-text" class="w-4 h-4 text-red-400 shrink-0"></i>
-                <span class="truncate">${normalized.name}</span>
-              </span>
-              <a href="${displayUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-[11px] font-semibold flex items-center space-x-1 shrink-0 ml-2 shadow-sm transition">
-                <i data-lucide="external-link" class="w-3 h-3"></i>
-                <span>Plein écran</span>
-              </a>
-            </div>
-            <div class="flex-1 w-full h-full relative bg-slate-100">
-              <object data="${displayUrl}" type="application/pdf" class="w-full h-full">
-                <iframe src="${displayUrl}" class="w-full h-full border-0">
-                  <div class="h-full flex flex-col items-center justify-center p-6 text-center space-y-3 bg-white">
-                    <i data-lucide="file-text" class="w-12 h-12 text-red-500"></i>
-                    <p class="text-xs text-slate-700 font-medium">Prévisualisation intégrée non supportée par votre navigateur.</p>
-                    <a href="${displayUrl}" target="_blank" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold shadow-sm">
-                      Ouvrir le PDF
-                    </a>
-                  </div>
-                </iframe>
-              </object>
-            </div>
-          </div>
-        `;
-      } else if (isImg) {
-        content.innerHTML = `<img src="${displayUrl}" class="max-h-full max-w-full object-contain rounded shadow-md">`;
-      } else {
-        content.innerHTML = `
-          <div class="text-center p-6 space-y-3">
-            <i data-lucide="file" class="w-12 h-12 text-slate-400 mx-auto"></i>
-            <p class="text-xs text-slate-600 font-medium">${normalized.name}</p>
-            <a href="${displayUrl}" target="_blank" class="px-3.5 py-2 bg-sky-600 text-white text-xs font-semibold rounded-lg shadow-sm">Consulter le document</a>
-          </div>
-        `;
-      }
-
-      dlBtn.onclick = () => {
-        const a = document.createElement('a');
-        a.href = displayUrl;
-        a.download = normalized.name || 'document';
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+      const priorityColors = {
+        'Critique': 'bg-red-100 text-red-700 border-red-200',
+        'Haute': 'bg-amber-100 text-amber-800 border-amber-200',
+        'Moyenne': 'bg-blue-100 text-blue-800 border-blue-200',
+        'Basse': 'bg-slate-100 text-slate-700 border-slate-200'
       };
+
+      const statusLabels = {
+        'A_FAIRE': { text: 'À faire', cls: 'bg-red-50 text-red-700 border-red-200' },
+        'EN_COURS': { text: 'En cours', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+        'TERMINE': { text: 'Terminé', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+      };
+
+      const statInfo = statusLabels[t.status] || statusLabels['A_FAIRE'];
+      const prioCls = priorityColors[t.priority] || priorityColors['Moyenne'];
+
+      const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
+
+      const card = document.createElement('div');
+      card.className = "bg-white/90 border border-amber-200/90 rounded-xl p-4 space-y-2 relative shadow-sm hover:border-amber-400 cursor-pointer transition";
+      card.onclick = () => openTravailDetailModal(t.id);
+
+      card.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div class="space-y-1">
+            <div class="flex items-center space-x-1.5 flex-wrap gap-1">
+              <span class="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-bold border border-amber-200">${targetName}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-bold border ${prioCls}">${t.priority}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-bold border ${statInfo.cls}">${statInfo.text}</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 mt-1">${t.title}</h3>
+            <div class="text-[11px] text-slate-500">Par ${t.author} • ${t.date}</div>
+          </div>
+          <div class="flex space-x-1" onclick="event.stopPropagation()">
+            ${isTechOrAdmin ? `
+              <button onclick="editTravail('${t.id}', event)" class="p-1 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded transition"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+              <button onclick="deleteTravail('${t.id}', event)" class="p-1 text-slate-400 hover:text-red-600 hover:bg-amber-50 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            ` : ''}
+          </div>
+        </div>
+        <p class="text-xs text-slate-700 leading-relaxed line-clamp-2">${t.description}</p>
+        ${t.pieces ? `<div class="text-xs text-amber-900 font-medium bg-amber-50 p-2 rounded-lg border border-amber-200/60"><span class="font-bold">Pièces :</span> ${t.pieces}</div>` : ''}
+      `;
+      return card;
+    }
+
+    function openAddTravailModal(travailIdToEdit = null) {
+      editingTravailId = travailIdToEdit;
+      const modal = document.getElementById('modal-add-travail');
+      const titleSpan = document.getElementById('travail-modal-title');
+      const submitBtn = document.getElementById('travail-btn-submit');
+
+      pickerState.travail.open = false;
+      pickerState.travail.filter = '';
+      document.getElementById('travail-tree-picker-dropdown').classList.add('hidden');
+
+      if (travailIdToEdit) {
+        const t = state.travauxList.find(item => item.id === travailIdToEdit);
+        if (!t) return;
+
+        titleSpan.innerText = "Modifier la fiche de Travail";
+        submitBtn.innerText = "Enregistrer les modifications";
+
+        let label = "★ TOUS LES ENSEMBLES (Globalité de l'installation)";
+        if (t.nodeId !== 'ALL_SETS') {
+          const n = state.tree.find(node => node.id === t.nodeId);
+          label = n ? (n.parentId === null ? n.zoneMk : n.name) : 'Machine';
+        }
+
+        document.getElementById('travail-select-target').value = t.nodeId;
+        document.getElementById('travail-picker-label').innerText = label;
+        document.getElementById('travail-input-priority').value = t.priority || 'Moyenne';
+        document.getElementById('travail-input-status').value = t.status || 'A_FAIRE';
+        document.getElementById('travail-input-title').value = t.title || '';
+        document.getElementById('travail-input-pieces').value = t.pieces || '';
+        document.getElementById('travail-input-desc').value = t.description || '';
+
+        travailAttachedImages = (t.images || []).map((img, i) => normalizeRexFile(img, `Fichier_${i+1}`)).filter(Boolean);
+        renderTravailFilesPreview();
+      } else {
+        titleSpan.innerText = "Relever un Travail à faire";
+        submitBtn.innerText = "Enregistrer le Travail";
+        document.getElementById('form-travail').reset();
+
+        let initialTarget = 'ALL_SETS';
+        let initialLabel = "★ TOUS LES ENSEMBLES (Globalité de l'installation)";
+
+        if (state.selectedId) {
+          const selNode = state.tree.find(n => n.id === state.selectedId);
+          if (selNode) {
+            initialTarget = selNode.id;
+            initialLabel = selNode.parentId === null ? selNode.zoneMk : selNode.name;
+          }
+        }
+
+        document.getElementById('travail-select-target').value = initialTarget;
+        document.getElementById('travail-picker-label').innerText = initialLabel;
+        travailAttachedImages = [];
+        renderTravailFilesPreview();
+      }
 
       modal.classList.remove('hidden');
       lucide.createIcons();
     }
 
-    function closeViewerModal() {
-      document.getElementById('modal-viewer').classList.add('hidden');
-      if (currentViewerBlobUrl) {
-        URL.revokeObjectURL(currentViewerBlobUrl);
-        currentViewerBlobUrl = null;
-      }
+    function closeAddTravailModal() {
+      document.getElementById('modal-add-travail').classList.add('hidden');
+      document.getElementById('form-travail').reset();
+      editingTravailId = null;
+      travailAttachedImages = [];
     }
 
-    function openRexDetailModal(rexId) {
-      const rex = state.rexList.find(r => r.id === rexId);
-      if (!rex) return;
+    function handleTravailFilesSelect(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
 
-      const isGuest = !state.activeUser || state.activeUser.id === 'guest';
-      const node = state.tree.find(n => n.id === rex.nodeId);
-      const nodeName = node ? (node.parentId === null ? node.zoneMk : node.name) : 'Mulhouse';
-
-      document.getElementById('rex-detail-machine-badge').innerText = nodeName;
-      document.getElementById('rex-detail-date-badge').innerText = rex.date || '';
-      document.getElementById('rex-detail-title').innerText = rex.title;
-      document.getElementById('rex-detail-author').innerText = rex.author;
-      document.getElementById('rex-detail-desc').innerText = rex.description;
-
-      const gainContainer = document.getElementById('rex-detail-gain-container');
-      const gainText = document.getElementById('rex-detail-gain-text');
-      if (rex.gain && rex.gain.trim()) {
-        gainText.innerText = rex.gain;
-        gainContainer.classList.remove('hidden');
-      } else {
-        gainContainer.classList.add('hidden');
-      }
-
-      const filesGrid = document.getElementById('rex-detail-files-grid');
-      const filesTitle = document.getElementById('rex-detail-files-title');
-      filesGrid.innerHTML = '';
-
-      const attachments = (rex.images || []).map((img, i) => normalizeRexFile(img, `Document ${i + 1}`)).filter(Boolean);
-      filesTitle.innerText = `Pièces Jointes & Documents (${attachments.length})`;
-
-      if (isGuest && attachments.length > 0) {
-        filesGrid.innerHTML = `
-          <div class="col-span-full p-4 bg-sky-50/80 border border-sky-200 rounded-xl flex items-center justify-between">
-            <div class="flex items-center space-x-2.5">
-              <i data-lucide="lock" class="w-4 h-4 text-amber-500 shrink-0"></i>
-              <span class="text-xs text-slate-700 font-medium">${attachments.length} document(s) et photo(s) protégés.</span>
-            </div>
-            <button onclick="closeRexDetailModal(); openLoginModal();" class="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-semibold transition">Se connecter</button>
-          </div>
-        `;
-      } else if (attachments.length === 0) {
-        filesGrid.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-sky-200">Aucun document ni photo associé à ce REX.</div>`;
-      } else {
-        attachments.forEach(file => {
-          const isPdf = file.type === 'application/pdf' || (file.name && file.name.toLowerCase().endsWith('.pdf'));
-          const card = document.createElement('div');
-          card.className = "bg-white p-2.5 rounded-xl border border-sky-200 hover:border-sky-400 hover:bg-sky-50/50 transition cursor-pointer flex flex-col justify-between space-y-2 group shadow-sm";
-          card.onclick = () => openViewerModal(file);
-
-          if (!isPdf && file.dataUrl.startsWith('data:image')) {
-            card.innerHTML = `
-              <div class="h-24 w-full rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center">
-                <img src="${file.dataUrl}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-              </div>
-              <div class="flex items-center justify-between text-[11px] font-semibold text-slate-800 truncate pt-1">
-                <span class="truncate">${file.name}</span>
-                <i data-lucide="eye" class="w-3.5 h-3.5 text-sky-600 shrink-0 ml-1"></i>
-              </div>
-            `;
-          } else {
-            card.innerHTML = `
-              <div class="h-24 w-full rounded-lg bg-red-50/80 border border-red-100 flex flex-col items-center justify-center p-2 text-center">
-                <i data-lucide="file-text" class="w-8 h-8 text-red-500 mb-1"></i>
-                <span class="text-[10px] font-bold text-red-800 uppercase tracking-wide">Document PDF</span>
-                <span class="text-[9px] text-slate-500">${file.size || ''}</span>
-              </div>
-              <div class="flex items-center justify-between text-[11px] font-semibold text-slate-800 truncate pt-1">
-                <span class="truncate">${file.name}</span>
-                <i data-lucide="external-link" class="w-3.5 h-3.5 text-red-600 shrink-0 ml-1"></i>
-              </div>
-            `;
+      let processed = 0;
+      files.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+          travailAttachedImages.push({
+            name: f.name,
+            size: (f.size / 1024).toFixed(1) + ' Ko',
+            type: isPdf ? 'application/pdf' : (f.type || 'image/jpeg'),
+            dataUrl: evt.target.result
+          });
+          processed++;
+          if (processed === files.length) {
+            renderTravailFilesPreview();
           }
-          filesGrid.appendChild(card);
-        });
+        };
+        reader.readAsDataURL(f);
+      });
+      e.target.value = '';
+    }
+
+    function renderTravailFilesPreview() {
+      const preview = document.getElementById('travail-files-preview');
+      const textNotice = document.getElementById('text-travail-files');
+      preview.innerHTML = '';
+
+      if (travailAttachedImages.length === 0) {
+        textNotice.innerText = "Ajouter des photos/documents...";
+        return;
       }
 
-      document.getElementById('rex-detail-btn-print').onclick = () => printSingleRex(rex.id);
-      
-      const editBtn = document.getElementById('rex-detail-btn-edit');
-      const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
-      editBtn.style.display = isTechOrAdmin ? 'flex' : 'none';
-      editBtn.onclick = () => {
-        closeRexDetailModal();
-        editRex(rex.id);
-      };
+      textNotice.innerText = `${travailAttachedImages.length} document(s) joint(s)`;
 
-      document.getElementById('modal-rex-detail').classList.remove('hidden');
+      travailAttachedImages.forEach((f, idx) => {
+        const isPdf = f.type === 'application/pdf' || (f.name && f.name.toLowerCase().endsWith('.pdf'));
+        const item = document.createElement('div');
+        item.className = "relative group rounded-lg overflow-hidden border border-amber-200 bg-white p-1 text-center shadow-sm";
+
+        if (isPdf) {
+          item.innerHTML = `
+            <div class="h-16 flex flex-col items-center justify-center bg-red-50 text-red-600 rounded">
+              <i data-lucide="file-text" class="w-5 h-5"></i>
+              <span class="text-[9px] truncate max-w-full px-1 font-semibold">${f.name}</span>
+            </div>
+            <button type="button" onclick="removeTravailFile(${idx})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-0.5 opacity-90 hover:opacity-100"><i data-lucide="x" class="w-3 h-3"></i></button>
+          `;
+        } else {
+          item.innerHTML = `
+            <img src="${f.dataUrl}" class="h-16 w-full object-cover rounded">
+            <button type="button" onclick="removeTravailFile(${idx})" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-0.5 opacity-90 hover:opacity-100"><i data-lucide="x" class="w-3 h-3"></i></button>
+          `;
+        }
+        preview.appendChild(item);
+      });
       lucide.createIcons();
     }
 
-    function closeRexDetailModal() {
-      document.getElementById('modal-rex-detail').classList.add('hidden');
+    function removeTravailFile(index) {
+      travailAttachedImages.splice(index, 1);
+      renderTravailFilesPreview();
+    }
+
+    async function saveTravailForm(e) {
+      e.preventDefault();
+      const targetNodeId = document.getElementById('travail-select-target').value;
+      const priority = document.getElementById('travail-input-priority').value;
+      const status = document.getElementById('travail-input-status').value;
+      const title = document.getElementById('travail-input-title').value;
+      const pieces = document.getElementById('travail-input-pieces').value;
+      const desc = document.getElementById('travail-input-desc').value;
+      const authorName = state.activeUser ? `${state.activeUser.firstname} ${state.activeUser.lastname} (${state.activeUser.role})` : 'Technicien';
+
+      if (editingTravailId) {
+        const t = state.travauxList.find(item => item.id === editingTravailId);
+        if (t) {
+          t.nodeId = targetNodeId;
+          t.priority = priority;
+          t.status = status;
+          t.title = title;
+          t.pieces = pieces;
+          t.description = desc;
+          t.images = travailAttachedImages;
+          addAuditLog('Modification Travail', `Mise à jour de "${title}"`);
+        }
+      } else {
+        const newTravail = {
+          id: 'trv_' + Date.now(),
+          nodeId: targetNodeId,
+          priority: priority,
+          status: status,
+          title: title,
+          pieces: pieces,
+          description: desc,
+          author: authorName,
+          date: new Date().toLocaleDateString('fr-FR'),
+          images: travailAttachedImages
+        };
+        state.travauxList.unshift(newTravail);
+        addAuditLog('Création Travail', `Nouveau travail relevé : "${title}"`);
+      }
+
+      await saveState();
+      closeAddTravailModal();
+      renderNodeDetail();
+      if (!document.getElementById('view-travaux').classList.contains('hidden')) renderAllTravaux();
+      showToast(editingTravailId ? "Fiche de travail mise à jour !" : "Travail enregistré avec succès !", 'success');
+    }
+
+    function editTravail(id, e) {
+      if (e) e.stopPropagation();
+      openAddTravailModal(id);
+    }
+
+    function deleteTravail(id, e) {
+      if (e) e.stopPropagation();
+      showConfirmModal("Supprimer la fiche", "Voulez-vous vraiment supprimer cette fiche de travail ?", async () => {
+        state.travauxList = state.travauxList.filter(t => t.id !== id);
+        addAuditLog('Suppression Travail', `Suppression du travail id ${id}`);
+        await saveState();
+        renderNodeDetail();
+        if (!document.getElementById('view-travaux').classList.contains('hidden')) renderAllTravaux();
+        showToast("Fiche supprimée.", 'info');
+      });
+    }
+
+    function openTravailDetailModal(id) {
+      const t = state.travauxList.find(item => item.id === id);
+      if (!t) return;
+
+      let targetName = "★ TOUS LES ENSEMBLES (Globalité)";
+      if (t.nodeId !== 'ALL_SETS') {
+        const node = state.tree.find(n => n.id === t.nodeId);
+        targetName = node ? (node.parentId === null ? node.zoneMk : node.name) : 'Mulhouse';
+      }
+
+      document.getElementById('travail-detail-badge-target').innerText = targetName;
+      document.getElementById('travail-detail-badge-priority').innerText = t.priority;
+      document.getElementById('travail-detail-badge-status').innerText = t.status === 'TERMINE' ? 'Terminé' : (t.status === 'EN_COURS' ? 'En cours' : 'À faire');
+      document.getElementById('travail-detail-date-badge').innerText = t.date;
+      document.getElementById('travail-detail-title').innerText = t.title;
+      document.getElementById('travail-detail-author').innerText = t.author;
+      document.getElementById('travail-detail-desc').innerText = t.description;
+
+      const piecesBox = document.getElementById('travail-detail-pieces-box');
+      const piecesText = document.getElementById('travail-detail-pieces-text');
+      if (t.pieces && t.pieces.trim()) {
+        piecesText.innerText = t.pieces;
+        piecesBox.classList.remove('hidden');
+      } else {
+        piecesBox.classList.add('hidden');
+      }
+
+      const filesGrid = document.getElementById('travail-detail-files-grid');
+      filesGrid.innerHTML = '';
+      const attachments = (t.images || []).map((img, i) => normalizeRexFile(img, `Document ${i + 1}`)).filter(Boolean);
+
+      attachments.forEach(file => {
+        const card = document.createElement('div');
+        card.className = "bg-white p-2.5 rounded-xl border border-amber-200 hover:border-amber-400 transition cursor-pointer flex flex-col justify-between space-y-2 group shadow-sm";
+        card.onclick = () => openViewerModal(file);
+        card.innerHTML = `
+          <div class="h-24 w-full rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center">
+            ${file.type === 'application/pdf' 
+              ? `<i data-lucide="file-text" class="w-8 h-8 text-red-500"></i>` 
+              : `<img src="${file.dataUrl}" class="w-full h-full object-cover">`}
+          </div>
+          <div class="text-[11px] font-semibold text-slate-800 truncate">${file.name}</div>
+        `;
+        filesGrid.appendChild(card);
+      });
+
+      document.getElementById('travail-detail-btn-print').onclick = () => printSingleTravail(t.id);
+      
+      const editBtn = document.getElementById('travail-detail-btn-edit');
+      const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
+      editBtn.style.display = isTechOrAdmin ? 'flex' : 'none';
+      editBtn.onclick = () => {
+        closeTravailDetailModal();
+        editTravail(t.id);
+      };
+
+      document.getElementById('modal-travail-detail').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeTravailDetailModal() {
+      document.getElementById('modal-travail-detail').classList.add('hidden');
+    }
+
+    function printSingleTravail(id) {
+      const t = state.travauxList.find(item => item.id === id);
+      if (!t) return;
+
+      let targetName = "TOUS LES ENSEMBLES";
+      if (t.nodeId !== 'ALL_SETS') {
+        const node = state.tree.find(n => n.id === t.nodeId);
+        targetName = node ? (node.parentId === null ? node.zoneMk : node.name) : 'Mulhouse';
+      }
+
+      const printArea = document.getElementById('printable-area');
+      printArea.innerHTML = `
+        <div style="font-family: sans-serif; padding: 25px; color: #1e293b;">
+          <h1 style="font-size: 22px; border-bottom: 2px solid #d97706; padding-bottom: 8px; margin-bottom: 12px;">Ordre de Travail — Maintenance Mécanique</h1>
+          <h2 style="font-size: 18px; margin-bottom: 4px;">${t.title}</h2>
+          <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">
+            Cible : <strong>${targetName}</strong> | Priorité : <strong>${t.priority}</strong> | Relevé par : <strong>${t.author}</strong> | Date : <strong>${t.date}</strong>
+          </p>
+
+          <div style="border-left: 3px solid #d97706; padding-left: 12px; margin-bottom: 16px;">
+            <h3 style="font-size: 13px; text-transform: uppercase; color: #d97706; margin: 0 0 6px 0;">Description des travaux à exécuter</h3>
+            <p style="font-size: 12px; line-height: 1.6; margin: 0;">${t.description}</p>
+          </div>
+
+          ${t.pieces ? `
+            <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 10px; margin-bottom: 16px;">
+              <strong style="color: #92400e; font-size: 12px;">Pièces / Outillage requis :</strong>
+              <span style="font-size: 12px; color: #78350f;">${t.pieces}</span>
+            </div>
+          ` : ''}
+
+          <div style="margin-top: 30px; display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 20px;">
+            <div>Visa Intervenant : ______________</div>
+            <div>Date Réalisation : ______________</div>
+            <div>Visa Responsable : ______________</div>
+          </div>
+        </div>
+      `;
+
+      printArea.classList.remove('hidden');
+      window.print();
+      printArea.classList.add('hidden');
     }
 
     function renderAllRex() {
@@ -1897,31 +2759,6 @@
       card.className = "bg-white/90 border border-sky-200 rounded-xl p-4 space-y-2 relative shadow-sm hover:border-sky-400 cursor-pointer transition";
       card.onclick = () => openRexDetailModal(rex.id);
 
-      let mediaSnippet = '';
-      if (rex.images && rex.images.length > 0) {
-        if (isGuest) {
-          mediaSnippet = `
-            <div class="flex items-center space-x-1 text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded w-fit mt-1">
-              <i data-lucide="lock" class="w-3 h-3"></i>
-              <span>${rex.images.length} document(s) protégé(s)</span>
-            </div>
-          `;
-        } else {
-          mediaSnippet = `
-            <div class="flex space-x-2 pt-1 overflow-x-auto">
-              ${rex.images.slice(0, 4).map(img => {
-                const norm = normalizeRexFile(img);
-                if (norm.type === 'application/pdf') {
-                  return `<div class="h-14 w-20 rounded bg-red-50 border border-red-200 flex flex-col items-center justify-center text-[9px] text-red-700 font-bold shrink-0"><i data-lucide="file-text" class="w-4 h-4 mb-0.5"></i>PDF</div>`;
-                }
-                return `<img src="${norm.dataUrl}" class="h-14 w-20 object-cover rounded border border-sky-200 shrink-0">`;
-              }).join('')}
-              ${rex.images.length > 4 ? `<div class="h-14 w-12 rounded bg-sky-50 border border-sky-200 flex items-center justify-center text-[10px] text-sky-700 font-bold shrink-0">+${rex.images.length - 4}</div>` : ''}
-            </div>
-          `;
-        }
-      }
-
       card.innerHTML = `
         <div class="flex justify-between items-start">
           <div>
@@ -1938,7 +2775,6 @@
         </div>
         <p class="text-xs text-slate-700 leading-relaxed line-clamp-2">${rex.description}</p>
         ${rex.gain ? `<div class="p-2 bg-sky-50 rounded-lg text-xs text-sky-900 border border-sky-200 flex items-center space-x-2"><i data-lucide="trending-up" class="w-3.5 h-3.5 text-sky-600"></i><span><strong>Gain :</strong> ${rex.gain}</span></div>` : ''}
-        ${mediaSnippet}
       `;
       return card;
     }
@@ -1948,18 +2784,10 @@
       const modal = document.getElementById('modal-add-rex');
       const titleSpan = document.getElementById('rex-modal-title');
       const submitBtn = document.getElementById('rex-btn-submit');
-      const selectRoot = document.getElementById('rex-select-root');
-      
-      selectRoot.innerHTML = '';
-      const roots = state.tree.filter(n => n.parentId === null);
-      if (roots.length === 0) {
-        showToast("Veuillez d'abord créer au moins une racine.", 'warning');
-        return;
-      }
 
-      roots.forEach(r => {
-        selectRoot.innerHTML += `<option value="${r.id}">${r.zoneMk || 'Racine'}</option>`;
-      });
+      pickerState.rex.open = false;
+      pickerState.rex.filter = '';
+      document.getElementById('rex-tree-picker-dropdown').classList.add('hidden');
 
       if (rexIdToEdit) {
         const rex = state.rexList.find(r => r.id === rexIdToEdit);
@@ -1968,22 +2796,12 @@
         titleSpan.innerText = "Modifier l'Amélioration";
         submitBtn.innerText = "Enregistrer les modifications";
 
-        let currentRoot = null;
-        const targetNode = state.tree.find(n => n.id === rex.nodeId);
-        if (targetNode) {
-          let curr = targetNode;
-          while (curr && curr.parentId !== null) {
-            curr = state.tree.find(n => n.id === curr.parentId);
-          }
-          currentRoot = curr ? curr.id : roots[0].id;
-        } else {
-          currentRoot = roots[0].id;
-        }
+        let label = "Sélectionner une machine...";
+        const n = state.tree.find(node => node.id === rex.nodeId);
+        if (n) label = n.parentId === null ? n.zoneMk : n.name;
 
-        selectRoot.value = currentRoot;
-        updateRexSubmachineOptions();
         document.getElementById('rex-select-sub').value = rex.nodeId;
-
+        document.getElementById('rex-picker-label').innerText = label;
         document.getElementById('rex-input-title').value = rex.title || '';
         document.getElementById('rex-input-gain').value = rex.gain || '';
         document.getElementById('rex-input-desc').value = rex.description || '';
@@ -1995,18 +2813,18 @@
         submitBtn.innerText = "Publier l'Amélioration";
         document.getElementById('form-rex').reset();
 
+        let initialId = '';
+        let initialLabel = "Sélectionner une machine...";
         if (state.selectedId) {
-          const selectedNode = state.tree.find(n => n.id === state.selectedId);
-          if (selectedNode) {
-            let curr = selectedNode;
-            while (curr && curr.parentId !== null) {
-              curr = state.tree.find(n => n.id === curr.parentId);
-            }
-            if (curr) selectRoot.value = curr.id;
+          const selNode = state.tree.find(n => n.id === state.selectedId);
+          if (selNode) {
+            initialId = selNode.id;
+            initialLabel = selNode.parentId === null ? selNode.zoneMk : selNode.name;
           }
         }
 
-        updateRexSubmachineOptions();
+        document.getElementById('rex-select-sub').value = initialId;
+        document.getElementById('rex-picker-label').innerText = initialLabel;
         rexAttachedImages = [];
         renderRexFilesPreview();
       }
@@ -2020,36 +2838,6 @@
       document.getElementById('form-rex').reset();
       editingRexId = null;
       rexAttachedImages = [];
-    }
-
-    function updateRexSubmachineOptions() {
-      const rootId = document.getElementById('rex-select-root').value;
-      const selectSub = document.getElementById('rex-select-sub');
-      selectSub.innerHTML = `<option value="${rootId}">(Seulement sur la Racine)</option>`;
-
-      function appendChildNodesToSelect(parentId, depth) {
-        const children = state.tree.filter(n => n.parentId === parentId);
-        children.forEach(child => {
-          const indent = '— '.repeat(depth);
-          selectSub.innerHTML += `<option value="${child.id}">${indent}${child.name || 'Sous-machine'}</option>`;
-          appendChildNodesToSelect(child.id, depth + 1);
-        });
-      }
-
-      appendChildNodesToSelect(rootId, 1);
-
-      if (state.selectedId && state.selectedId !== rootId) {
-        const isChildOfRoot = (nodeId) => {
-          const curr = state.tree.find(n => n.id === nodeId);
-          if (!curr || !curr.parentId) return false;
-          if (curr.parentId === rootId) return true;
-          return isChildOfRoot(curr.parentId);
-        };
-
-        if (isChildOfRoot(state.selectedId)) {
-          selectSub.value = state.selectedId;
-        }
-      }
     }
 
     function handleRexFilesSelect(e) {
@@ -2121,6 +2909,10 @@
     async function saveRexForm(e) {
       e.preventDefault();
       const subId = document.getElementById('rex-select-sub').value;
+      if (!subId) {
+        showToast("Veuillez sélectionner une machine cible.", "warning");
+        return;
+      }
       const title = document.getElementById('rex-input-title').value;
       const gain = document.getElementById('rex-input-gain').value;
       const desc = document.getElementById('rex-input-desc').value;
@@ -2175,6 +2967,96 @@
       });
     }
 
+    function openRexDetailModal(rexId) {
+      const rex = state.rexList.find(r => r.id === rexId);
+      if (!rex) return;
+
+      const node = state.tree.find(n => n.id === rex.nodeId);
+      const nodeName = node ? (node.parentId === null ? node.zoneMk : node.name) : 'Mulhouse';
+
+      document.getElementById('rex-detail-machine-badge').innerText = nodeName;
+      document.getElementById('rex-detail-date-badge').innerText = rex.date || '';
+      document.getElementById('rex-detail-title').innerText = rex.title;
+      document.getElementById('rex-detail-author').innerText = rex.author;
+      document.getElementById('rex-detail-desc').innerText = rex.description;
+
+      const gainContainer = document.getElementById('rex-detail-gain-container');
+      const gainText = document.getElementById('rex-detail-gain-text');
+      if (rex.gain && rex.gain.trim()) {
+        gainText.innerText = rex.gain;
+        gainContainer.classList.remove('hidden');
+      } else {
+        gainContainer.classList.add('hidden');
+      }
+
+      const filesGrid = document.getElementById('rex-detail-files-grid');
+      filesGrid.innerHTML = '';
+      const attachments = (rex.images || []).map((img, i) => normalizeRexFile(img, `Document ${i + 1}`)).filter(Boolean);
+
+      attachments.forEach(file => {
+        const card = document.createElement('div');
+        card.className = "bg-white p-2.5 rounded-xl border border-sky-200 hover:border-sky-400 transition cursor-pointer flex flex-col justify-between space-y-2 group shadow-sm";
+        card.onclick = () => openViewerModal(file);
+        card.innerHTML = `
+          <div class="h-24 w-full rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center">
+            ${file.type === 'application/pdf' ? `<i data-lucide="file-text" class="w-8 h-8 text-red-500"></i>` : `<img src="${file.dataUrl}" class="w-full h-full object-cover">`}
+          </div>
+          <div class="text-[11px] font-semibold text-slate-800 truncate">${file.name}</div>
+        `;
+        filesGrid.appendChild(card);
+      });
+
+      document.getElementById('rex-detail-btn-print').onclick = () => printSingleRex(rex.id);
+      
+      const editBtn = document.getElementById('rex-detail-btn-edit');
+      const isTechOrAdmin = state.activeUser && (state.activeUser.role === 'Administrateur' || state.activeUser.role === 'Technicien');
+      editBtn.style.display = isTechOrAdmin ? 'flex' : 'none';
+      editBtn.onclick = () => {
+        closeRexDetailModal();
+        editRex(rex.id);
+      };
+
+      document.getElementById('modal-rex-detail').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeRexDetailModal() {
+      document.getElementById('modal-rex-detail').classList.add('hidden');
+    }
+
+    function printSingleRex(rexId) {
+      const rex = state.rexList.find(r => r.id === rexId);
+      if (!rex) return;
+
+      const node = state.tree.find(n => n.id === rex.nodeId);
+      const nodeName = node ? (node.parentId === null ? node.zoneMk : node.name) : 'Mulhouse';
+      const printArea = document.getElementById('printable-area');
+
+      printArea.innerHTML = `
+        <div style="font-family: sans-serif; padding: 25px; color: #1e293b;">
+          <h1 style="font-size: 22px; border-bottom: 2px solid #0284c7; padding-bottom: 8px; margin-bottom: 12px;">Fiche Retour d'Expérience (REX) — Mulhouse Ambiant</h1>
+          <h2 style="font-size: 18px; margin-bottom: 4px;">${rex.title}</h2>
+          <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">Machine / Zone : <strong>${nodeName}</strong> | Par : <strong>${rex.author}</strong> | Date : <strong>${rex.date}</strong></p>
+
+          <div style="border-left: 3px solid #0284c7; padding-left: 12px; margin-bottom: 16px;">
+            <h3 style="font-size: 13px; text-transform: uppercase; color: #0284c7; margin: 0 0 6px 0;">Description de l'intervention</h3>
+            <p style="font-size: 12px; line-height: 1.6; margin: 0;">${rex.description}</p>
+          </div>
+
+          ${rex.gain ? `
+            <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 10px; margin-bottom: 16px;">
+              <strong style="color: #0369a1; font-size: 12px;">Gain constaté :</strong>
+              <span style="font-size: 12px; color: #0c4a6e;">${rex.gain}</span>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      printArea.classList.remove('hidden');
+      window.print();
+      printArea.classList.add('hidden');
+    }
+
     function openAddModal(parentId) {
       editingNodeId = null;
       currentParentId = parentId;
@@ -2183,13 +3065,10 @@
       pendingFolderUploadFiles = null;
 
       const isRacine = parentId === null;
-
       document.getElementById('modal-title').innerText = isRacine ? "Créer une Racine" : "Créer une Sous-Machine";
+      document.getElementById('input-name-label').innerText = isRacine ? "Nom de la Racine (Zone MK) *" : "Nom de la sous-machine *";
       document.getElementById('form-add-node').reset();
 
-      document.getElementById('field-zone-container').style.display = isRacine ? 'block' : 'none';
-      document.getElementById('field-drive-container').style.display = isRacine ? 'none' : 'block';
-      
       const previewBox = document.getElementById('folder-import-preview-box');
       if (previewBox) previewBox.classList.add('hidden');
 
@@ -2218,22 +3097,15 @@
       pendingFolderUploadFiles = null;
 
       const isRacine = node.parentId === null;
-
       document.getElementById('modal-title').innerText = "Modifier l'élément";
-      document.getElementById('field-zone-container').style.display = isRacine ? 'block' : 'none';
-      document.getElementById('field-drive-container').style.display = isRacine ? 'none' : 'block';
+      document.getElementById('input-name-label').innerText = isRacine ? "Nom de la Racine (Zone MK) *" : "Nom de la sous-machine *";
+      document.getElementById('input-name').value = isRacine ? (node.zoneMk || '') : (node.name || '');
 
       const previewBox = document.getElementById('folder-import-preview-box');
       if (previewBox) previewBox.classList.add('hidden');
 
-      if (isRacine) {
-        document.getElementById('input-zone').value = node.zoneMk || '';
-      } else {
-        document.getElementById('input-name').value = node.name || '';
-        renderExistingFilesUI();
-        updateUploadedFilesListUI();
-      }
-
+      renderExistingFilesUI();
+      updateUploadedFilesListUI();
       document.getElementById('modal-add-node').classList.remove('hidden');
     }
 
@@ -2246,44 +3118,6 @@
       pendingFolderUploadFiles = null;
       const previewBox = document.getElementById('folder-import-preview-box');
       if (previewBox) previewBox.classList.add('hidden');
-    }
-
-    function cancelPendingFolderImport() {
-      pendingFolderUploadFiles = null;
-      const previewBox = document.getElementById('folder-import-preview-box');
-      if (previewBox) previewBox.classList.add('hidden');
-      document.getElementById('text-machine-folder').innerText = "Dossier Drive / PC";
-      showToast("Importation du dossier annulée.", "info");
-    }
-
-    function addGoogleDriveLink() {
-      const titleInput = document.getElementById('input-gdrive-title');
-      const urlInput = document.getElementById('input-gdrive-url');
-
-      const title = titleInput.value.trim();
-      const url = urlInput.value.trim();
-
-      if (!url) {
-        showToast("Veuillez saisir une URL Google Drive valide.", 'warning');
-        return;
-      }
-
-      let type = 'googledrive';
-      if (url.includes('docs.google.com/spreadsheets') || url.includes('sheet')) type = 'googlesheet';
-      else if (url.includes('docs.google.com/document') || url.includes('doc')) type = 'googledoc';
-
-      const fileObj = {
-        name: title || (type === 'googlesheet' ? 'Google Sheet' : (type === 'googledoc' ? 'Google Doc' : 'Dossier Google Drive')),
-        size: 'Lien Google Cloud',
-        type: type,
-        dataUrl: url
-      };
-
-      newUploadFilesList.push(fileObj);
-      titleInput.value = '';
-      urlInput.value = '';
-      updateUploadedFilesListUI();
-      showToast("Lien Google Drive ajouté.", 'success');
     }
 
     function isIgnoredSystemFile(file) {
@@ -2301,50 +3135,21 @@
 
       let pending = files.length;
       files.forEach(f => {
-        const isGoogleDriveShortcut = f.name.endsWith('.gdoc') || f.name.endsWith('.gsheet') || f.name.endsWith('.gslides') || f.name.endsWith('.url');
-
         const reader = new FileReader();
         reader.onload = function(evt) {
-          let fileType = f.type || (f.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
-          let fileDataUrl = evt.target.result;
-
-          if (isGoogleDriveShortcut) {
-            try {
-              const textContent = evt.target.result;
-              const match = textContent.match(/https?:\/\/[^\s"']+/);
-              if (match) {
-                fileDataUrl = match[0];
-                fileType = f.name.endsWith('.gsheet') ? 'googlesheet' : (f.name.endsWith('.gdoc') ? 'googledoc' : 'googledrive');
-              }
-            } catch(err) {}
-          }
-
+          const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
           newUploadFilesList.push({
-            name: f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, ''),
+            name: f.name,
             size: (f.size / 1024).toFixed(1) + ' Ko',
-            type: fileType,
-            dataUrl: fileDataUrl
+            type: isPdf ? 'application/pdf' : (f.type || 'application/octet-stream'),
+            dataUrl: evt.target.result
           });
-
           pending--;
           if (pending === 0) updateUploadedFilesListUI();
         };
-
-        if (isGoogleDriveShortcut) reader.readAsText(f);
-        else reader.readAsDataURL(f);
+        reader.readAsDataURL(f);
       });
-
       e.target.value = '';
-    }
-
-    function removeExistingFile(index) {
-      existingFilesList.splice(index, 1);
-      renderExistingFilesUI();
-    }
-
-    function removeNewFile(index) {
-      newUploadFilesList.splice(index, 1);
-      updateUploadedFilesListUI();
     }
 
     function renderExistingFilesUI() {
@@ -2362,17 +3167,20 @@
       container.innerHTML = existingFilesList.map((f, idx) => `
         <div class="flex items-center justify-between p-2 bg-slate-50 rounded border border-sky-200 text-xs">
           <div class="truncate flex items-center space-x-2">
-            <i data-lucide="${f.type && f.type.includes('drive') ? 'folder-git-2' : (f.type && f.type.includes('sheet') ? 'table' : (f.type === 'application/pdf' ? 'file-text' : 'file-check'))}" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            <i data-lucide="file-check" class="w-4 h-4 text-emerald-600 shrink-0"></i>
             <span class="truncate text-slate-800 font-medium">${f.name}</span>
-            <span class="text-[10px] text-slate-400">(${f.size || ''})</span>
           </div>
           <button type="button" onclick="removeExistingFile(${idx})" class="p-1 hover:bg-slate-200 rounded text-red-600 transition" title="Supprimer ce fichier">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       `).join('');
-
       lucide.createIcons();
+    }
+
+    function removeExistingFile(index) {
+      existingFilesList.splice(index, 1);
+      renderExistingFilesUI();
     }
 
     function updateUploadedFilesListUI() {
@@ -2389,11 +3197,10 @@
       listContainer.innerHTML = newUploadFilesList.map((f, idx) => `
         <div class="flex items-center justify-between p-2 bg-sky-50 rounded border border-sky-200 text-xs">
           <div class="truncate flex items-center space-x-2">
-            <i data-lucide="${f.type && f.type.includes('drive') ? 'folder-plus' : (f.type && f.type.includes('sheet') ? 'table' : (f.type === 'application/pdf' ? 'file-text' : 'file-plus'))}" class="w-4 h-4 text-sky-600 shrink-0"></i>
+            <i data-lucide="file-plus" class="w-4 h-4 text-sky-600 shrink-0"></i>
             <span class="truncate text-sky-900 font-medium">${f.name}</span>
-            <span class="text-[10px] text-slate-400">(${f.size || ''})</span>
           </div>
-          <button type="button" onclick="removeNewFile(${idx})" class="p-1 hover:bg-sky-100 rounded text-red-600 transition" title="Retirer">
+          <button type="button" onclick="removeNewFile(${idx})" class="p-1 hover:bg-sky-100 rounded text-red-600 transition">
             <i data-lucide="x" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -2403,15 +3210,49 @@
       lucide.createIcons();
     }
 
-    function handleMachineFolderUpload(e) {
-      const files = Array.from(e.target.files).filter(f => !isIgnoredSystemFile(f));
-      if (files.length === 0) {
-        showToast("Aucun fichier valide dans ce dossier.", "warning");
+    function removeNewFile(index) {
+      newUploadFilesList.splice(index, 1);
+      updateUploadedFilesListUI();
+    }
+
+    function addGoogleDriveLink() {
+      const titleInput = document.getElementById('input-gdrive-title');
+      const urlInput = document.getElementById('input-gdrive-url');
+
+      const title = titleInput.value.trim();
+      const url = urlInput.value.trim();
+
+      if (!url) {
+        showToast("Veuillez saisir une URL Google Drive valide.", 'warning');
         return;
       }
 
-      pendingFolderUploadFiles = files;
-      const firstRelPath = files[0].webkitRelativePath || '';
+      newUploadFilesList.push({
+        name: title || 'Dossier Google Drive',
+        size: 'Lien Google Cloud',
+        type: 'googledrive',
+        dataUrl: url
+      });
+
+      titleInput.value = '';
+      urlInput.value = '';
+      updateUploadedFilesListUI();
+      showToast("Lien Google Drive ajouté.", 'success');
+    }
+
+    function handleMachineFolderUpload(e) {
+      const rawFiles = Array.from(e.target.files);
+      if (rawFiles.length === 0) {
+        openPromptModal("Créer un dossier vide", "Nom du nouveau dossier :", "Nouveau Dossier", (folderName) => {
+          if (folderName && folderName.trim()) {
+            createEmptyFolderNode(folderName.trim());
+          }
+        });
+        return;
+      }
+
+      pendingFolderUploadFiles = rawFiles;
+      const firstRelPath = rawFiles[0].webkitRelativePath || '';
       const rootFolderName = firstRelPath ? firstRelPath.split('/')[0] : 'Dossier Drive';
 
       const inputName = document.getElementById('input-name');
@@ -2419,19 +3260,7 @@
         inputName.value = rootFolderName;
       }
 
-      const folderSet = new Set();
-      let pdfCount = 0;
-      files.forEach(f => {
-        const rel = f.webkitRelativePath || '';
-        const parts = rel.split('/');
-        if (parts.length > 2) {
-          folderSet.add(parts.slice(1, -1).join('/'));
-        }
-        if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
-          pdfCount++;
-        }
-      });
-
+      const validFiles = rawFiles.filter(f => !isIgnoredSystemFile(f));
       const previewBox = document.getElementById('folder-import-preview-box');
       const statsBox = document.getElementById('folder-preview-stats');
       const textMachineFolder = document.getElementById('text-machine-folder');
@@ -2440,17 +3269,45 @@
         statsBox.innerHTML = `
           <div>Dossier racine : <strong>${rootFolderName}</strong></div>
           <div class="text-[11px] text-sky-800">
-            • <strong>${files.length}</strong> fichier(s) détecté(s) (${pdfCount} PDF)
-            ${folderSet.size > 0 ? `<br>• <strong>${folderSet.size}</strong> sous-dossier(s) hiérarchique(s)` : ''}
+            • <strong>${validFiles.length}</strong> fichier(s) document(s) détecté(s)
           </div>
         `;
       }
 
       if (previewBox) previewBox.classList.remove('hidden');
-      if (textMachineFolder) textMachineFolder.innerText = `${files.length} fichier(s) prêt(s)`;
+      if (textMachineFolder) textMachineFolder.innerText = `${validFiles.length} fichier(s)`;
       lucide.createIcons();
-      showToast(`Dossier "${rootFolderName}" prêt à être importé (${files.length} fichiers).`, 'info');
       e.target.value = '';
+    }
+
+    function cancelPendingFolderImport() {
+      pendingFolderUploadFiles = null;
+      const previewBox = document.getElementById('folder-import-preview-box');
+      if (previewBox) previewBox.classList.add('hidden');
+      document.getElementById('text-machine-folder').innerText = "Dossier Drive / PC";
+    }
+
+    function createEmptyFolderNode(folderName) {
+      const targetParent = currentParentId;
+      const isRacine = targetParent === null;
+
+      const newNode = {
+        id: 'node_' + Date.now(),
+        parentId: targetParent,
+        zoneMk: isRacine ? folderName : '',
+        name: isRacine ? '' : folderName,
+        files: []
+      };
+
+      state.tree.push(newNode);
+      if (targetParent) localExpandedNodeIds.add(targetParent);
+      state.selectedId = newNode.id;
+
+      addAuditLog('Création Dossier', `Création du dossier vide "${folderName}"`);
+      saveState();
+      renderTree();
+      renderNodeDetail();
+      showToast(`Dossier vide "${folderName}" créé avec succès !`, 'success');
     }
 
     function cancelOngoingImport() {
@@ -2466,7 +3323,63 @@
 
       renderTree();
       renderNodeDetail();
-      showToast("Importation interrompue et annulée avec succès.", "warning");
+      showToast("Importation interrompue et annulée.", "warning");
+    }
+
+    async function saveNode(e) {
+      e.preventDefault();
+      const isRacine = currentParentId === null;
+      const nodeName = document.getElementById('input-name').value.trim();
+
+      if (pendingFolderUploadFiles && pendingFolderUploadFiles.length > 0) {
+        const mode = document.querySelector('input[name="folder-import-mode"]:checked')?.value || 'hierarchy';
+        const targetParent = editingNodeId ? editingNodeId : currentParentId;
+        const folderFiles = pendingFolderUploadFiles;
+        pendingFolderUploadFiles = null;
+
+        closeAddModal();
+
+        if (mode === 'hierarchy') {
+          await importFolderWithHierarchy(folderFiles, targetParent, nodeName);
+        } else {
+          await processFilesBatch(folderFiles, nodeName);
+          await saveState();
+          renderTree();
+          renderNodeDetail();
+        }
+        return;
+      }
+
+      const finalFilesList = [...existingFilesList, ...newUploadFilesList];
+
+      if (editingNodeId) {
+        const node = state.tree.find(n => n.id === editingNodeId);
+        if (node) {
+          if (isRacine) node.zoneMk = nodeName;
+          else node.name = nodeName;
+          node.files = finalFilesList;
+          addAuditLog('Modification Machine', `Mise à jour de "${nodeName}"`);
+        }
+      } else {
+        const newNode = {
+          id: 'node_' + Date.now(),
+          parentId: currentParentId,
+          zoneMk: isRacine ? nodeName : '',
+          name: isRacine ? '' : nodeName,
+          files: finalFilesList
+        };
+
+        state.tree.push(newNode);
+        if (currentParentId) localExpandedNodeIds.add(currentParentId);
+        state.selectedId = newNode.id;
+        addAuditLog('Création Machine', `Création de "${nodeName}"`);
+      }
+
+      await saveState();
+      closeAddModal();
+      renderTree();
+      renderNodeDetail();
+      showToast("Élément enregistré avec succès.", 'success');
     }
 
     async function processFilesBatch(rawFiles, customName) {
@@ -2479,23 +3392,24 @@
 
       try {
         const validFiles = (rawFiles || []).filter(f => !isIgnoredSystemFile(f));
-        if (validFiles.length === 0) return;
-
-        const targetParent = editingNodeId ? editingNodeId : (currentParentId || state.selectedId);
-        const firstRelPath = validFiles[0].webkitRelativePath || '';
+        const targetParent = currentParentId;
+        const isRacine = targetParent === null;
+        const firstRelPath = (rawFiles[0] && rawFiles[0].webkitRelativePath) ? rawFiles[0].webkitRelativePath : '';
         const rootFolderName = customName || (firstRelPath ? firstRelPath.split('/')[0] : 'Dossier');
 
         let targetNode = null;
         if (editingNodeId) {
           targetNode = state.tree.find(n => n.id === editingNodeId);
-          if (targetNode && customName) targetNode.name = customName;
+          if (targetNode && customName) {
+            if (targetNode.parentId === null) targetNode.zoneMk = customName;
+            else targetNode.name = customName;
+          }
         } else {
           targetNode = {
             id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
             parentId: targetParent,
-            expanded: true,
-            zoneMk: '',
-            name: rootFolderName,
+            zoneMk: isRacine ? rootFolderName : '',
+            name: isRacine ? '' : rootFolderName,
             files: []
           };
           state.tree.push(targetNode);
@@ -2504,10 +3418,10 @@
 
         isImportCancelled = false;
         if (modalProgress) {
-          progressTitle.innerText = `Téléversement dans "${targetNode.name}"...`;
+          progressTitle.innerText = `Téléversement dans "${rootFolderName}"...`;
           progressDetail.innerText = "Démarrage des fichiers...";
-          progressBar.style.width = "5%";
-          progressPercent.innerText = "5%";
+          progressBar.style.width = "10%";
+          progressPercent.innerText = "10%";
           progressCount.innerText = `0 / ${validFiles.length}`;
           modalProgress.classList.remove('hidden');
         }
@@ -2537,7 +3451,7 @@
           }
 
           completed++;
-          const pct = Math.min(95, Math.round((completed / validFiles.length) * 100));
+          const pct = Math.min(95, Math.round((completed / (validFiles.length || 1)) * 100));
           if (progressBar) progressBar.style.width = `${pct}%`;
           if (progressPercent) progressPercent.innerText = `${pct}%`;
           if (progressCount) progressCount.innerText = `${completed} / ${validFiles.length}`;
@@ -2553,78 +3467,9 @@
         }
       } catch (err) {
         console.error("Erreur processFilesBatch:", err);
-        showToast("Erreur lors de l'import : " + err.message, "error");
       } finally {
         if (modalProgress) modalProgress.classList.add('hidden');
       }
-    }
-
-    async function saveNode(e) {
-      e.preventDefault();
-
-      const isRacine = currentParentId === null;
-
-      if (pendingFolderUploadFiles && pendingFolderUploadFiles.length > 0) {
-        const mode = document.querySelector('input[name="folder-import-mode"]:checked')?.value || 'hierarchy';
-        const targetParent = editingNodeId ? editingNodeId : (currentParentId || state.selectedId);
-        const nameInput = document.getElementById('input-name');
-        const customName = nameInput ? nameInput.value.trim() : '';
-        const folderFiles = pendingFolderUploadFiles;
-        pendingFolderUploadFiles = null;
-
-        closeAddModal();
-
-        if (mode === 'hierarchy') {
-          await importFolderWithHierarchy(folderFiles, targetParent, customName);
-        } else {
-          await processFilesBatch(folderFiles, customName);
-          await saveState();
-          renderTree();
-          renderNodeDetail();
-        }
-        return;
-      }
-
-      const finalFilesList = [...existingFilesList, ...newUploadFilesList];
-
-      if (editingNodeId) {
-        const node = state.tree.find(n => n.id === editingNodeId);
-        if (node) {
-          if (isRacine) {
-            node.zoneMk = document.getElementById('input-zone').value;
-          } else {
-            node.name = document.getElementById('input-name').value;
-            node.files = finalFilesList;
-          }
-          addAuditLog('Modification Machine', `Mise à jour de "${isRacine ? node.zoneMk : node.name}"`);
-        }
-      } else {
-        const newNode = {
-          id: 'node_' + Date.now(),
-          parentId: currentParentId,
-          expanded: true,
-          zoneMk: isRacine ? document.getElementById('input-zone').value : '',
-          name: isRacine ? '' : document.getElementById('input-name').value,
-          files: isRacine ? [] : finalFilesList
-        };
-
-        state.tree.push(newNode);
-
-        if (currentParentId) {
-          const parent = state.tree.find(n => n.id === currentParentId);
-          if (parent) parent.expanded = true;
-        }
-
-        state.selectedId = newNode.id;
-        addAuditLog('Création Machine', `Création de "${isRacine ? newNode.zoneMk : newNode.name}"`);
-      }
-
-      showToast("Enregistrement en cours...", 'info');
-      await saveState();
-
-      closeAddModal();
-      renderTree();
-      renderNodeDetail();
     }
 
     async function importFolderWithHierarchy(rawFiles, targetParentId, customRootName = '') {
@@ -2638,15 +3483,11 @@
       const progressCount = document.getElementById('upload-progress-count');
 
       try {
-        const validFiles = rawFiles.filter(f => !isIgnoredSystemFile(f));
-        if (validFiles.length === 0) {
-          showToast("Aucun fichier valide à importer.", "warning");
-          return;
-        }
-
         isImportCancelled = false;
-        const firstRelPath = validFiles[0].webkitRelativePath || '';
+        const validFiles = rawFiles.filter(f => !isIgnoredSystemFile(f));
+        const firstRelPath = (rawFiles[0] && rawFiles[0].webkitRelativePath) ? rawFiles[0].webkitRelativePath : '';
         const rootFolderName = customRootName || (firstRelPath ? firstRelPath.split('/')[0] : 'Dossier Drive');
+        const isRoot = targetParentId === null;
 
         if (modalProgress) {
           progressTitle.innerText = `Importation de "${rootFolderName}"...`;
@@ -2663,23 +3504,22 @@
         const rootNode = {
           id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
           parentId: targetParentId,
-          expanded: true,
-          zoneMk: '',
-          name: rootFolderName,
+          zoneMk: isRoot ? rootFolderName : '',
+          name: isRoot ? '' : rootFolderName,
           files: []
         };
         state.tree.push(rootNode);
         createdNodeIds.push(rootNode.id);
 
-        const targetParent = state.tree.find(n => n.id === targetParentId);
-        if (targetParent) targetParent.expanded = true;
+        if (targetParentId) localExpandedNodeIds.add(targetParentId);
+        localExpandedNodeIds.add(rootNode.id);
 
         const folderMap = new Map();
         folderMap.set('', rootNode);
         let createdFoldersCount = 1;
         const fileTasks = [];
 
-        for (const f of validFiles) {
+        for (const f of rawFiles) {
           const relPath = f.webkitRelativePath || '';
           const parts = relPath.split('/');
           const dirSegments = parts.slice(1, -1);
@@ -2694,7 +3534,6 @@
               const newNode = {
                 id: 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 7) + '_' + createdFoldersCount,
                 parentId: currentNode.id,
-                expanded: true,
                 zoneMk: '',
                 name: segment,
                 files: []
@@ -2702,154 +3541,67 @@
               state.tree.push(newNode);
               createdNodeIds.push(newNode.id);
               folderMap.set(pathKey, newNode);
+              localExpandedNodeIds.add(newNode.id);
               createdFoldersCount++;
             }
             currentNode = folderMap.get(pathKey);
           }
 
-          fileTasks.push({ file: f, targetNode: currentNode });
+          if (!isIgnoredSystemFile(f)) {
+            fileTasks.push({ file: f, targetNode: currentNode });
+          }
         }
 
         const total = fileTasks.length;
         let completed = 0;
-        let failedFilesCount = 0;
-        const CONCURRENCY = 2;
-        let taskIndex = 0;
 
-        async function worker() {
-          while (taskIndex < total) {
+        if (total > 0) {
+          for (const task of fileTasks) {
             if (isImportCancelled) break;
-
-            const currentIndex = taskIndex++;
-            const task = fileTasks[currentIndex];
             const f = task.file;
             const targetNode = task.targetNode;
 
             let publicUrl = await uploadFileToSupabaseStorage(f, 'machines');
-
-            if (!publicUrl) {
-              if (f.size < 600 * 1024) {
-                publicUrl = await new Promise(resolve => {
-                  const reader = new FileReader();
-                  reader.onload = ev => resolve(ev.target.result);
-                  reader.onerror = () => resolve(null);
-                  reader.readAsDataURL(f);
-                });
-              } else {
-                failedFilesCount++;
-                console.warn(`Fichier ${f.name} trop lourd (${(f.size/1024).toFixed(0)} Ko) pour être mis en cache mémoire sans Storage.`);
-              }
+            if (!publicUrl && f.size < 600 * 1024) {
+              publicUrl = await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = ev => resolve(ev.target.result);
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(f);
+              });
             }
-
-            if (isImportCancelled) break;
 
             if (publicUrl) {
               const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
-              const fileType = isPdf ? 'application/pdf' : (f.type || 'application/octet-stream');
-
               targetNode.files.push({
                 name: f.name.replace(/\.(gdoc|gsheet|gslides|url)$/i, ''),
                 size: (f.size / 1024).toFixed(1) + ' Ko',
-                type: fileType,
+                type: isPdf ? 'application/pdf' : (f.type || 'application/octet-stream'),
                 dataUrl: publicUrl
               });
             }
 
             completed++;
-            const pct = Math.min(90, Math.round((completed / total) * 90));
+            const pct = Math.min(95, Math.round((completed / total) * 95));
             if (progressBar) progressBar.style.width = `${pct}%`;
             if (progressPercent) progressPercent.innerText = `${pct}%`;
-            if (progressCount) progressCount.innerText = `${completed} / ${total} fichier(s)`;
-            if (progressDetail) progressDetail.innerText = `[${targetNode.name}] ${f.name}`;
+            if (progressCount) progressCount.innerText = `${completed} / ${total}`;
           }
         }
 
-        const workers = [];
-        for (let i = 0; i < Math.min(CONCURRENCY, total); i++) {
-          workers.push(worker());
+        if (!isImportCancelled) {
+          state.selectedId = rootNode.id;
+          addAuditLog('Import Dossier Arborescence', `"${rootFolderName}" : ${createdFoldersCount} dossier(s), ${completed} fichier(s).`);
+          await saveState();
+          renderTree();
+          renderNodeDetail();
+          showToast(`Dossier "${rootFolderName}" importé (${createdFoldersCount} dossiers, ${completed} fichiers).`, 'success');
         }
-        await Promise.all(workers);
-
-        if (isImportCancelled) {
-          return;
-        }
-
-        if (progressDetail) progressDetail.innerText = "Synchronisation Cloud...";
-        if (progressBar) progressBar.style.width = "95%";
-        if (progressPercent) progressPercent.innerText = "95%";
-
-        state.selectedId = rootNode.id;
-        lastImportedRootNodeIds = createdNodeIds;
-
-        addAuditLog('Import Dossier Arborescence', `"${rootFolderName}" : ${createdFoldersCount} dossier(s), ${completed - failedFilesCount} fichier(s).`);
-        await saveState();
-
-        if (progressBar) progressBar.style.width = "100%";
-        if (progressPercent) progressPercent.innerText = "100%";
-
-        renderTree();
-        renderNodeDetail();
-
-        const notice = failedFilesCount > 0 ? ` (${failedFilesCount} fichier(s) volumineux non-téléversés)` : '';
-        showUndoToast(`Dossier "${rootFolderName}" importé (${createdFoldersCount} dossiers, ${completed - failedFilesCount} fichiers)${notice}.`, () => undoLastImport(createdNodeIds, rootFolderName));
       } catch (err) {
         console.error("Erreur durant importFolderWithHierarchy:", err);
-        showToast("Erreur lors de l'importation : " + err.message, "error");
       } finally {
-        setTimeout(() => {
-          if (modalProgress) modalProgress.classList.add('hidden');
-        }, 350);
+        if (modalProgress) modalProgress.classList.add('hidden');
       }
-    }
-
-    function showUndoToast(message, onUndo) {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-
-      const toast = document.createElement('div');
-      toast.className = "bg-slate-900 text-white pointer-events-auto px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center justify-between space-x-3 transition-all transform duration-300 border border-sky-400";
-      toast.innerHTML = `
-        <div class="flex items-center space-x-2">
-          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-          <span class="font-medium">${message}</span>
-        </div>
-        <button id="btn-undo-action" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg text-xs font-bold shrink-0 transition flex items-center space-x-1 shadow-sm">
-          <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
-          <span>Annuler l'import</span>
-        </button>
-      `;
-      container.appendChild(toast);
-      lucide.createIcons();
-
-      const undoBtn = toast.querySelector('#btn-undo-action');
-      let undone = false;
-      undoBtn.onclick = () => {
-        undone = true;
-        toast.remove();
-        if (onUndo) onUndo();
-      };
-
-      setTimeout(() => {
-        if (!undone && toast.parentNode) {
-          toast.classList.add('opacity-0', 'translate-y-2');
-          setTimeout(() => toast.remove(), 300);
-        }
-      }, 15000);
-    }
-
-    async function undoLastImport(nodeIds, folderName) {
-      if (!nodeIds || nodeIds.length === 0) return;
-      showConfirmModal("Annuler l'importation", `Voulez-vous supprimer l'intégralité du dossier importé "${folderName}" et ses sous-machines ?`, async () => {
-        state.tree = state.tree.filter(n => !nodeIds.includes(n.id));
-        state.rexList = state.rexList.filter(r => !nodeIds.includes(r.nodeId));
-        state.selectedId = state.tree.length > 0 ? state.tree[0].id : null;
-        
-        addAuditLog('Annulation Import', `Suppression de l'import "${folderName}"`);
-        await saveState();
-        renderTree();
-        renderNodeDetail();
-        showToast(`L'importation de "${folderName}" a été annulée.`, 'info');
-      });
     }
 
     function copyCurrentNode() {
@@ -2861,7 +3613,6 @@
       }
 
       copiedNodeBuffer = JSON.parse(JSON.stringify(nodeToCopy));
-      
       const badge = document.getElementById('copied-badge');
       const badgeText = document.getElementById('copied-badge-text');
       badgeText.innerText = `Copié : "${copiedNodeBuffer.name}" (Prêt à coller)`;
@@ -2872,15 +3623,7 @@
     }
 
     async function pasteCopiedNode() {
-      if (!copiedNodeBuffer) {
-        showToast("Aucune sous-machine en mémoire.", 'warning');
-        return;
-      }
-      if (!state.selectedId) {
-        showToast("Sélectionnez la machine ou zone cible dans laquelle coller.", 'warning');
-        return;
-      }
-
+      if (!copiedNodeBuffer || !state.selectedId) return;
       const targetParent = state.tree.find(n => n.id === state.selectedId);
       if (!targetParent) return;
 
@@ -2890,9 +3633,8 @@
           ...JSON.parse(JSON.stringify(sourceNode)),
           id: newId,
           parentId: targetParentId,
-          name: sourceNode.name ? (targetParentId === sourceNode.parentId ? sourceNode.name + ' (Copie)' : sourceNode.name) : 'Sous-machine'
+          name: sourceNode.name + ' (Copie)'
         };
-
         state.tree.push(newNode);
 
         const originalRexs = state.rexList.filter(r => r.nodeId === sourceNode.id);
@@ -2906,13 +3648,11 @@
 
         const children = state.tree.filter(n => n.parentId === sourceNode.id);
         children.forEach(child => duplicateNodeRecursive(child, newId));
-
         return newId;
       }
 
       const createdId = duplicateNodeRecursive(copiedNodeBuffer, targetParent.id);
-
-      targetParent.expanded = true;
+      localExpandedNodeIds.add(targetParent.id);
       state.selectedId = createdId;
 
       addAuditLog('Duplication Machine', `Duplication de "${copiedNodeBuffer.name}" vers "${targetParent.zoneMk || targetParent.name}"`);
@@ -2929,7 +3669,7 @@
 
       const name = nodeToDelete.parentId === null ? nodeToDelete.zoneMk : nodeToDelete.name;
 
-      showConfirmModal("Supprimer l'élément", `Supprimer "${name}" et toutes ses sous-machines ?`, async () => {
+      showConfirmModal("Supprimer l'élément", `Supprimer "${name}" et tous ses sous-éléments ?`, async () => {
         const idsToDelete = [nodeToDelete.id];
         function collectChildren(parentId) {
           const children = state.tree.filter(n => n.parentId === parentId);
@@ -2942,6 +3682,7 @@
 
         state.tree = state.tree.filter(n => !idsToDelete.includes(n.id));
         state.rexList = state.rexList.filter(r => !idsToDelete.includes(r.nodeId));
+        state.travauxList = state.travauxList.filter(t => !idsToDelete.includes(t.nodeId));
         state.selectedId = state.tree.length > 0 ? state.tree[0].id : null;
 
         addAuditLog('Suppression Machine', `Suppression de "${name}" et ses enfants`);
@@ -2961,87 +3702,34 @@
       const title = isRacine ? node.zoneMk : node.name;
       const childNodes = state.tree.filter(n => n.parentId === node.id);
       const rexs = state.rexList.filter(r => r.nodeId === node.id);
+      const travaux = state.travauxList.filter(t => t.nodeId === node.id);
 
       printArea.innerHTML = `
         <div style="font-family: sans-serif; padding: 20px; color: #1e293b;">
           <h1 style="font-size: 24px; border-bottom: 2px solid #0284c7; padding-bottom: 8px; margin-bottom: 12px;">Fiche Machine — Méca MULHOUSE AMBIANT</h1>
           <h2 style="font-size: 18px; margin-bottom: 8px;">${isRacine ? 'Racine / Zone' : 'Sous-machine'} : ${title}</h2>
-          <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">Imprimé le ${new Date().toLocaleString('fr-FR')} par ${state.activeUser ? state.activeUser.firstname + ' ' + state.activeUser.lastname : 'Utilisateur'}</p>
+          <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">Imprimé le ${new Date().toLocaleString('fr-FR')}</p>
 
           <h3 style="font-size: 14px; text-transform: uppercase; color: #0284c7; margin-top: 16px;">Sous-éléments (${childNodes.length})</h3>
           <ul style="font-size: 12px; line-height: 1.6;">
             ${childNodes.map(c => `<li><strong>${c.name}</strong></li>`).join('') || '<li>Aucune sous-machine</li>'}
           </ul>
 
-          <h3 style="font-size: 14px; text-transform: uppercase; color: #0284c7; margin-top: 16px;">Ressources & Fichiers (${node.files ? node.files.length : 0})</h3>
+          <h3 style="font-size: 14px; text-transform: uppercase; color: #0284c7; margin-top: 16px;">Travaux à faire (${travaux.length})</h3>
           <ul style="font-size: 12px; line-height: 1.6;">
-            ${(node.files && node.files.length > 0) ? node.files.map(f => `<li>${f.name} (${f.size || 'Lien'})</li>`).join('') : '<li>Aucun fichier associé</li>'}
+            ${travaux.map(t => `<li><strong>${t.title}</strong> [${t.priority}] — ${t.status}</li>`).join('') || '<li>Aucun travail en attente</li>'}
           </ul>
 
           <h3 style="font-size: 14px; text-transform: uppercase; color: #0284c7; margin-top: 16px;">Améliorations / REX (${rexs.length})</h3>
-          ${rexs.map(r => `
-            <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; margin-top: 8px;">
-              <h4 style="margin: 0 0 4px 0; font-size: 13px;">${r.title}</h4>
-              <p style="margin: 0; font-size: 11px; color: #64748b;">Par ${r.author} — ${r.date}</p>
-              <p style="margin: 6px 0 0 0; font-size: 12px;">${r.description}</p>
-              ${r.gain ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #0369a1;"><strong>Gain :</strong> ${r.gain}</p>` : ''}
-            </div>
-          `).join('') || '<p style="font-size: 12px; color: #94a3b8;">Aucun REX enregistré pour cette machine.</p>'}
+          <ul style="font-size: 12px; line-height: 1.6;">
+            ${rexs.map(r => `<li><strong>${r.title}</strong> par ${r.author} (${r.date})</li>`).join('') || '<li>Aucun REX</li>'}
+          </ul>
         </div>
       `;
 
       printArea.classList.remove('hidden');
       window.print();
       printArea.classList.add('hidden');
-    }
-
-    function printSingleRex(rexId) {
-      const rex = state.rexList.find(r => r.id === rexId);
-      if (!rex) return;
-
-      const node = state.tree.find(n => n.id === rex.nodeId);
-      const nodeName = node ? (node.parentId === null ? node.zoneMk : node.name) : 'Mulhouse';
-      const printArea = document.getElementById('printable-area');
-
-      printArea.innerHTML = `
-        <div style="font-family: sans-serif; padding: 25px; color: #1e293b;">
-          <h1 style="font-size: 22px; border-bottom: 2px solid #0284c7; padding-bottom: 8px; margin-bottom: 12px;">Fiche Retour d'Expérience (REX) — Mulhouse Ambiant</h1>
-          <h2 style="font-size: 18px; margin-bottom: 4px;">${rex.title}</h2>
-          <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">Machine / Zone : <strong>${nodeName}</strong> | Par : <strong>${rex.author}</strong> | Date : <strong>${rex.date}</strong></p>
-
-          <div style="border-left: 3px solid #0284c7; padding-left: 12px; margin-bottom: 16px;">
-            <h3 style="font-size: 13px; text-transform: uppercase; color: #0284c7; margin: 0 0 6px 0;">Description de l'intervention</h3>
-            <p style="font-size: 12px; line-height: 1.6; margin: 0;">${rex.description}</p>
-          </div>
-
-          ${rex.gain ? `
-            <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 10px; margin-bottom: 16px;">
-              <strong style="color: #0369a1; font-size: 12px;">Gain constaté :</strong>
-              <span style="font-size: 12px; color: #0c4a6e;">${rex.gain}</span>
-            </div>
-          ` : ''}
-
-          ${(rex.images && rex.images.length > 0) ? `
-            <h3 style="font-size: 13px; text-transform: uppercase; color: #0284c7; margin-bottom: 8px;">Documents & Photos</h3>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              ${rex.images.map(img => `<img src="${typeof img === 'object' ? img.dataUrl : img}" style="max-height: 180px; border-radius: 6px; border: 1px solid #cbd5e1;">`).join('')}
-            </div>
-          ` : ''}
-        </div>
-      `;
-
-      printArea.classList.remove('hidden');
-      window.print();
-      printArea.classList.add('hidden');
-    }
-
-    function clearAuditLogs() {
-      showConfirmModal("Effacer le journal", "Voulez-vous vraiment effacer l'ensemble de l'historique d'audit ?", () => {
-        state.auditLogs = [];
-        saveState();
-        renderAuditLogs();
-        showToast("Historique d'audit effacé.", 'info');
-      });
     }
 
     function renderSynoptique() {
@@ -3078,6 +3766,15 @@
       );
     }
 
+    function clearAuditLogs() {
+      showConfirmModal("Effacer le journal", "Voulez-vous vraiment effacer l'ensemble de l'historique d'audit ?", () => {
+        state.auditLogs = [];
+        saveState();
+        renderAuditLogs();
+        showToast("Historique d'audit effacé.", 'info');
+      });
+    }
+
     function openCreateUserModal() { document.getElementById('modal-create-user').classList.remove('hidden'); }
     function closeCreateUserModal() { document.getElementById('modal-create-user').classList.add('hidden'); }
 
@@ -3089,7 +3786,6 @@
       const password = document.getElementById('input-user-password').value;
 
       const passwordHash = await hashPassword(password);
-
       const newUser = { id: 'u_' + Date.now(), firstname, lastname, role, passwordHash };
       state.users.push(newUser);
       addAuditLog('Création Compte', `Création compte ${firstname} ${lastname} (${role})`);
@@ -3122,7 +3818,6 @@
         `;
         container.appendChild(item);
       });
-
       lucide.createIcons();
     }
 
@@ -3181,20 +3876,8 @@
     }
 
     function logoutUser() {
-      const prevName = state.activeUser && state.activeUser.id !== 'guest' 
-        ? `${state.activeUser.firstname} ${state.activeUser.lastname}` 
-        : '';
-
       state.activeUser = GUEST_USER;
-      try {
-        sessionStorage.removeItem('meca_local_user');
-      } catch(e) {}
-
-      if (prevName) {
-        addAuditLog('Déconnexion', `Déconnexion de ${prevName} (retour en Invité)`);
-        saveState();
-      }
-
+      try { sessionStorage.removeItem('meca_local_user'); } catch(e) {}
       applyUserPermissions();
       renderNodeDetail();
       showToast("Déconnecté. Vous êtes maintenant en mode Invité.", 'info');
@@ -3207,6 +3890,7 @@
         activeUser: state.activeUser,
         tree: state.tree,
         rexList: state.rexList,
+        travauxList: state.travauxList,
         synoptiqueUrl: state.synoptiqueUrl,
         auditLogs: state.auditLogs || []
       };
@@ -3235,6 +3919,7 @@
           if (importedData && importedData.tree) {
             state.tree = importedData.tree || [];
             state.rexList = importedData.rexList || [];
+            state.travauxList = importedData.travauxList || [];
             state.synoptiqueUrl = importedData.synoptiqueUrl || '';
             if (importedData.users) state.users = importedData.users;
             if (importedData.activeUser) state.activeUser = importedData.activeUser;
